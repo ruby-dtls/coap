@@ -92,7 +92,7 @@ class TestMessage < Test::Unit::TestCase
   # XXX TODO add token tests
 
   def test_fenceposting
-    m = CoRE::CoAP::Message.new(:con, :get, 4711, "Hello", {})
+    m = CoRE::CoAP::Message.new(:con, :get, 4711, "Hello")
     Log.debug m
     m.options = { max_age: 987654321, if_none_match: true }
     Log.debug m
@@ -105,7 +105,7 @@ class TestMessage < Test::Unit::TestCase
   end
 
   def test_fenceposting2
-    m = CoRE::CoAP::Message.new(:con, :get, 4711, "Hello", {})
+    m = CoRE::CoAP::Message.new(:con, :get, 4711, "Hello")
     Log.debug m
     m.options = { 4711 => ["foo"], 256 => ["bar"] }
     Log.debug m
@@ -118,7 +118,7 @@ class TestMessage < Test::Unit::TestCase
   end
 
   def test_emptypayload
-    m = CoRE::CoAP::Message.new(:con, :get, 4711, "", {})
+    m = CoRE::CoAP::Message.new(:con, :get, 4711, "")
     Log.debug m
     m.options = { 4711 => ["foo"], 256 => ["bar"], 65535 => ["abc" * 100] }
     Log.debug m
@@ -133,7 +133,7 @@ class TestMessage < Test::Unit::TestCase
   def test_option_numbers
     (0...65536).each do |on|
       unless CoRE::CoAP::OPTIONS[on] # those might have special semantics
-        m = CoRE::CoAP::Message.new(:con, :get, 4711, "Hello", {})
+        m = CoRE::CoAP::Message.new(:con, :get, 4711, "Hello")
         m.options = { on => [""] }
         me = m.to_wire
         m2 = CoRE::CoAP::parse(me)
@@ -145,7 +145,7 @@ class TestMessage < Test::Unit::TestCase
 
   def test_option_lengths
     (0...1035).each do |ol|
-      m = CoRE::CoAP::Message.new(:con, :get, 4711, "Hello", {})
+      m = CoRE::CoAP::Message.new(:con, :get, 4711, "Hello")
       m.options = { 99 => ["x"*ol] }
       me = m.to_wire
       m2 = CoRE::CoAP::parse(me)

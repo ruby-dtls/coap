@@ -91,8 +91,8 @@ module CoRE
     METHODS_I = invert_into_hash(METHODS)
 
     # for now, keep 19
-#      TOKEN_ON = -1             # handled specially
-      TOKEN_ON = 19
+#   TOKEN_ON = -1             # handled specially
+    TOKEN_ON = 19
 
     # 14 => :user, default, length range, replicable?, decoder, encoder
     OPTIONS = { # name      minlength, maxlength, [default]    defined where:
@@ -263,9 +263,10 @@ module CoRE
     end
 
     class Message < Struct.new(:ver, :tt, :mcode, :mid, :options, :payload)
-      def initialize(*args)     # convenience: .new(tt?, mcode?, mid?, payload?, hash)
+      def initialize(*args) # convenience: .new(tt?, mcode?, mid?, payload?, hash?)
         if args.size < 6
-          h = args.pop.dup
+          h = {}
+          h = args.pop.dup if args.last.is_a? Hash
           tt = h.delete(:tt) || args.shift
           mcode = h.delete(:mcode) || args.shift
           case mcode
@@ -274,7 +275,7 @@ module CoRE
           end
           mid = h.delete(:mid) || args.shift
           payload = h.delete(:payload) || args.shift || EMPTY # no payload = empty payload
-          raise "CoRE::CoAPMessage.new: hash or all args" unless args.empty?
+          raise "CoRE::CoAP::Message.new: hash or all args" unless args.empty?
           super(1, tt, mcode, mid, h, payload)
         else
           super
