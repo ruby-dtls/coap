@@ -1,10 +1,9 @@
 # -*- encoding: utf-8 -*-
 require_relative 'coap_test_helper'
 
-require "core/coap-message.rb"
+require 'core/coap-message.rb'
 
 class TestMessage < Test::Unit::TestCase
-
   def test_number_of_bits_up_to
     assert_equal 0, CoRE::CoAP.number_of_bits_up_to(1)
     assert_equal 4, CoRE::CoAP.number_of_bits_up_to(16)
@@ -81,67 +80,69 @@ class TestMessage < Test::Unit::TestCase
 
   def test_coap_message
     input = "\x44\x02\x12\xA0abcd\x41A\x7B.well-known\x04core\x0D\x04rhabarbersaftglas\xFFfoobar".force_encoding("BINARY")
-    input.hexdump('input ')
+    Log.debug input.hexdump('input ')
     output = CoRE::CoAP.parse(input)
-    p output
-    puts "critical?: #{output.options.map { |k, v| [k, CoRE::CoAP.critical?(k)]}.inspect}"
+    Log.debug output
+    Log.debug "critical?: #{output.options.map { |k, v| [k, CoRE::CoAP.critical?(k)]}.inspect}"
     w = output.to_wire
-    w.hexdump('output ')
+    Log.debug w.hexdump('output ')
     assert_equal input, w
   end
 
-# XXX TODO add token tests
+  # XXX TODO add token tests
 
   def test_fenceposting
     m = CoRE::CoAP::Message.new(:con, :get, 4711, "Hello", {})
-    p m
+    Log.debug m
     m.options = { max_age: 987654321, if_none_match: true }
-    p m
+    Log.debug m
     me = m.to_wire
-    p me
+    Log.debug me.inspect
     m2 = CoRE::CoAP::parse(me)
-    p m2
+    Log.debug m2
     m.options = CoRE::CoAP::DEFAULTING_OPTIONS.merge(m.options)
     assert_equal m2, m
   end
+
   def test_fenceposting2
     m = CoRE::CoAP::Message.new(:con, :get, 4711, "Hello", {})
-    p m
+    Log.debug m
     m.options = { 4711 => ["foo"], 256 => ["bar"] }
-    p m
+    Log.debug m
     me = m.to_wire
-    p me
+    Log.debug me.inspect
     m2 = CoRE::CoAP::parse(me)
-    p m2
+    Log.debug m2
     m.options = CoRE::CoAP::DEFAULTING_OPTIONS.merge(m.options)
     assert_equal m2, m
   end
+
   def test_emptypayload
     m = CoRE::CoAP::Message.new(:con, :get, 4711, "", {})
-    p m
+    Log.debug m
     m.options = { 4711 => ["foo"], 256 => ["bar"], 65535 => ["abc" * 100] }
-    p m
+    Log.debug m
     me = m.to_wire
-    p me
+    Log.debug me.inspect
     m2 = CoRE::CoAP::parse(me)
-    p m2
+    Log.debug m2
     m.options = CoRE::CoAP::DEFAULTING_OPTIONS.merge(m.options)
     assert_equal m2, m
   end
+
   def test_option_numbers
     (0...65536).each do |on|
       unless CoRE::CoAP::OPTIONS[on] # those might have special semantics
         m = CoRE::CoAP::Message.new(:con, :get, 4711, "Hello", {})
         m.options = { on => [""] }
-        # p m
         me = m.to_wire
-        # p me
         m2 = CoRE::CoAP::parse(me)
         m.options = CoRE::CoAP::DEFAULTING_OPTIONS.merge(m.options)
         assert_equal m2, m
       end
     end
   end
+
   def test_option_lengths
     (0...1035).each do |ol|
       m = CoRE::CoAP::Message.new(:con, :get, 4711, "Hello", {})

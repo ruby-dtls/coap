@@ -2,16 +2,17 @@
 # Copyright (C) 2010..2013 Carsten Bormann <cabo@tzi.org>
 
 class String
-  def hexdump(prefix = '', out = STDOUT)
-    i = 0
+  def hexdump(prefix = '', prepend_newline = true)
+    a, i = [], 0
+    a << '' if prepend_newline
     while i < length
       slice = self.byteslice(i, 16)
-      out.puts "%s%-48s |%-16s|" %
+      a << '%s%-48s |%-16s|' %
         [prefix,
-         slice.bytes.map { |b| "%02x" % b.ord}.join(" "),
+         slice.bytes.map { |b| '%02x' % b.ord }.join(' '),
          slice.gsub(/[^ -~]/mn, ".")]
       i += 16
     end
-    out
+    a.join("\n")
   end
 end
