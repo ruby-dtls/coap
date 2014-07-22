@@ -3,6 +3,9 @@ language: ruby
 rvm:
   - 2.1
 
+notifications:
+  email: false
+
 script:
   - bundle exec rake build
   - bundle exec rake test
