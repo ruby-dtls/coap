@@ -29,7 +29,7 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
 
   s.add_development_dependency 'bundler', '~> 1.6'
-  s.add_development_dependency 'rake', '~> 10.1'
+  s.add_development_dependency 'rake', '~> 10.3'
   s.add_development_dependency 'coveralls', '~> 0.7', '>= 0.7.0'
 
   s.add_dependency 'resolv-ipv6favor', '~> 0'
