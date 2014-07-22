@@ -5,3 +5,4 @@ end
 
 require_relative 'coap/coap.rb'
 require_relative 'coap/message.rb'
+require_relative 'coap/version.rb'
