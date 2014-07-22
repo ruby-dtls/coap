@@ -1,7 +1,7 @@
 require 'test/unit'
 require 'logger'
 
-require 'core/hexdump.rb'
+require 'core.rb'
 
 d = ENV['DEBUG']
 Log = Logger.new(d && IO.new(d.to_i))

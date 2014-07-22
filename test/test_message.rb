@@ -1,8 +1,6 @@
 # -*- encoding: utf-8 -*-
 require_relative 'coap_test_helper'
 
-require 'core/coap-message.rb'
-
 class TestMessage < Test::Unit::TestCase
   def test_number_of_bits_up_to
     assert_equal 0, CoRE::CoAP.number_of_bits_up_to(1)
