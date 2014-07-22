@@ -1,6 +1,8 @@
 language: ruby
+
 rvm:
-  - 2.1.0
+  - 2.1
+
 script:
-  - "bundle exec rake build"
-  - "bundle exec rake test"
+  - bundle exec rake build
+  - bundle exec rake test
