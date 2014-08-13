@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
     10s of kbit/s. The protocol is designed for machine-to-machine (M2M)
     applications such as smart energy and building automation.'
 
-  s.homepage = "https://github.com/SmallLars/coap"
+  s.homepage = 'https://github.com/nning/coap'
   s.license  = 'MIT'
   s.authors  = ['Carsten Bormann', 'Simon Frerichs', 'henning mueller']
   s.email    = 'henning@orgizm.net'

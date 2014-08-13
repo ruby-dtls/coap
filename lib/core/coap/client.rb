@@ -1,32 +1,25 @@
 module CoRE
   module CoAP
-
     # CoAP client library
     class Client
+      attr_accessor :max_payload, :max_retransmit, :ack_timeout, :host, :port
 
-      # attr_writer
-      #
-      # @param max_payload optional payload size, default 256
-      # @param max_retransmit optional retransmit count, default 4
-      # @param ack_timeout optional ack_timeout, default 2
-      # @param hostname dest optional hostname
-      # @param port dest optional port
-      attr_writer :max_payload, :max_retransmit, :ack_timeout, :hostname, :port
+      # @param  options   Valid options are (all optional): max_payload (maximum payload size, default 256), max_retransmit (maximum retransmission count, default 4), ack_timeout (timeout for ACK responses, default: 2), host (destination host), post (destination port, default 5683).
+      def initialize(options = {})
+        default_options = {
+          max_payload:    256,
+          max_retransmit: 4,
+          ack_timeout:    2
+        }
 
-      # new arguments
-      #
-      # @param max_payload optional payload size, default 256
-      # @param max_retransmit optional retransmit count, default 4
-      # @param ack_timeout optional ack_timeout, default 2
-      # @param hostname dest optional hostname
-      # @param port dest optional port
-      def initialize(max_payload = 256, max_retransmit = 4, ack_timeout = 2, hostname = nil, port = nil)
-        @max_payload = max_payload
-        @max_retransmit = max_retransmit
-        @ack_timeout = ack_timeout
+        options = default_options.merge(options)
 
-        @hostname = hostname
-        @port = port
+        @max_payload    = options[:max_payload]
+        @max_retransmit = options[:max_retransmit]
+        @ack_timeout    = options[:ack_timeout]
+
+        @host = options[:hostname]
+        @port = options[:port]
 
         # dont change the following stuff
         @retry_count = 0
@@ -55,178 +48,135 @@ module CoRE
         # string.scan(/.{1,#{size}}/)
       end
 
-      def decode_url(url)
-        url_decoded = CoAP.scheme_and_authority_decode(url)
-
-        @logger.debug 'url decoded: ' + url_decoded.inspect
-        fail ArgumentError, 'Invalid URL' if url_decoded.nil?
-
-        url_decoded
-      end
-
-      # simple coap get
+      # GET
       #
-      # @param url coap scheme + authority url eg coap://coap.me:5683/time
-      # @param options coap options
+      # @param  host      Destination host
+      # @param  port      Destination port
+      # @param  path      Path
+      # @param  payload   Payload
+      # @param  options   Options
       #
-      # @return CoAP::Message #<struct CoAP::Message ver=1, tt=:ack, mcode=[2, 5], mid=866, options={:max_age=>60, :token=>150, :etag=>[16135160785136240028], :content_format=>40, :block2=>226}, payload=\"\\\";ct=50,</5>;rt=\\\"5\\\";ct=50\">"
-      def get_by_url(url, options = {})
-        url_decoded = CoAP.scheme_and_authority_decode(url)
-
-        @logger.debug 'url decoded: ' + url_decoded.inspect
-        fail ArgumentError, 'Invalid URL' if url_decoded.nil?
-
-        get(url_decoded[0], url_decoded[1], url_decoded[2], options)
-      end
-
-      # simple coap get
-      #
-      # @param hostname hostname or ip address
-      # @param port port to connect to
-      # @param uri eg /.well-known/core
-      # @param options coap options
-      #
-      # @return CoAP::Message #<struct CoAP::Message ver=1, tt=:ack, mcode=[2, 5], mid=866, options={:max_age=>60, :token=>150, :etag=>[16135160785136240028], :content_format=>40, :block2=>226}, payload=\"\\\";ct=50,</5>;rt=\\\"5\\\";ct=50\">"
-      def get(hostname, port, uri, options = {})
+      # @return CoAP::Message
+      def get(host, port, path, payload = nil, options = {})
         @retry_count = 0
-        client(hostname, port, uri, :get, nil, options)
+        client(host, port, path, :get, payload, options)
       end
 
-      # coap post
+      # GET by URI
       #
-      # @param url coap scheme + authority url eg coap://coap.me:5683/time
-      # @param payload payload which should be send
-      # @param options coap options
+      # @param  uri       URI
+      # @param  payload   Payload
+      # @param  options   Options
       #
-      # @return CoAP::Message #<struct CoAP::Message ver=1, tt=:ack, mcode=[2, 5], mid=866, options={:max_age=>60, :token=>150, :etag=>[16135160785136240028], :content_format=>40, :block2=>226}, payload=\"\\\";ct=50,</5>;rt=\\\"5\\\";ct=50\">"
-      def post_by_url(url, payload, options = {})
-        url_decoded = CoAP.scheme_and_authority_decode(url)
-
-        @logger.debug 'url decoded: ' + url_decoded.inspect
-        fail ArgumentError, 'Invalid URL' if url_decoded.nil?
-
-        post(url_decoded[0], url_decoded[1], url_decoded[2], payload, options)
+      # @return CoAP::Message
+      def get_by_uri(uri, payload = nil, options = {})
+        get(*decode_uri(uri), payload, options)
       end
 
-      # coap post
+      # POST
       #
-      # @param hostname hostname or ip address
-      # @param port port to connect to
-      # @param uri eg /.well-known/core
-      # @param payload payload which should be send
-      # @param options coap options
+      # @param  host      Destination host
+      # @param  port      Destination port
+      # @param  path      Path
+      # @param  payload   Payload
+      # @param  options   Options
       #
-      # @return CoAP::Message #<struct CoAP::Message ver=1, tt=:ack, mcode=[2, 5], mid=866, options={:max_age=>60, :token=>150, :etag=>[16135160785136240028], :content_format=>40, :block2=>226}, payload=\"\\\";ct=50,</5>;rt=\\\"5\\\";ct=50\">"
-      def post(hostname, port, uri, payload, options = {})
+      # @return CoAP::Message
+      def post(host, port, path, payload = nil, options = {})
         @retry_count = 0
-        client(hostname, port, uri, :post, payload, options)
+        client(host, port, uri, :post, payload, options)
       end
 
-      # coap put
+      # POST by URI
       #
-      # @param url coap scheme + authority url eg coap://coap.me:5683/time
-      # @param payload payload which should be send
-      # @param options coap options
+      # @param  uri       URI
+      # @param  payload   Payload
+      # @param  options   Options
       #
-      # @return CoAP::Message #<struct CoAP::Message ver=1, tt=:ack, mcode=[2, 5], mid=866, options={:max_age=>60, :token=>150, :etag=>[16135160785136240028], :content_format=>40, :block2=>226}, payload=\"\\\";ct=50,</5>;rt=\\\"5\\\";ct=50\">"
-      def put_by_url(url, payload, options = {})
-        url_decoded = CoAP.scheme_and_authority_decode(url)
-
-        @logger.debug 'url decoded: ' + url_decoded.inspect
-        fail ArgumentError, 'Invalid URL' if url_decoded.nil?
-
-        put(url_decoded[0], url_decoded[1], url_decoded[2], payload, options)
+      # @return CoAP::Message
+      def post_by_uri(uri, payload = nil, options = {})
+        post(*decode_uri(uri), payload, options)
       end
 
-      # coap put
+      # PUT
       #
-      # @param hostname hostname or ip address
-      # @param port port to connect to
-      # @param uri eg /.well-known/core
-      # @param payload payload which should be send
-      # @param options coap options
+      # @param  hsot      Destination host
+      # @param  port      Destination port
+      # @param  path      Path
+      # @param  payload   Payload
+      # @param  options   Options
       #
-      # @return CoAP::Message #<struct CoAP::Message ver=1, tt=:ack, mcode=[2, 5], mid=866, options={:max_age=>60, :token=>150, :etag=>[16135160785136240028], :content_format=>40, :block2=>226}, payload=\"\\\";ct=50,</5>;rt=\\\"5\\\";ct=50\">"
-      def put(hostname, port, uri, payload, options = {})
+      # @return CoAP::Message
+      def put(host, port, path, payload = nil, options = {})
         @retry_count = 0
-        client(hostname, port, uri, :put, payload, options)
+        client(host, port, path, :put, payload, options)
       end
 
-      # coap delete
+      # PUT by URI
       #
-      # @param url coap scheme + authority url eg coap://coap.me:5683/time
-      # @param options coap options
+      # @param  uri       URI
+      # @param  payload   Payload
+      # @param  options   Options
       #
-      # @return CoAP::Message #<struct CoAP::Message ver=1, tt=:ack, mcode=[2, 5], mid=866, options={:max_age=>60, :token=>150, :etag=>[16135160785136240028], :content_format=>40, :block2=>226}, payload=\"\\\";ct=50,</5>;rt=\\\"5\\\";ct=50\">"
-      def delete_by_url(hostname, port, uri, options = {})
-        url_decoded = CoAP.scheme_and_authority_decode(url)
-
-        @logger.debug 'url decoded: ' + url_decoded.inspect
-        fail ArgumentError, 'Invalid URL' if url_decoded.nil?
-
-        delete(url_decoded[0], url_decoded[1], url_decoded[2], options)
+      # @return CoAP::Message
+      def put_by_uri(uri, payload = nil, options = {})
+        put(*decode_uri(uri), payload, options)
       end
 
-      # coap delete
+      # DELETE
       #
-      # @param hostname hostname or ip address
-      # @param port port to connect to
-      # @param uri eg /.well-known/core
-      # @param options coap options
+      # @param  host      Destination host
+      # @param  port      Destination port
+      # @param  path      Path
+      # @param  payload   Payload
+      # @param  options   Options
       #
-      # @return CoAP::Message #<struct CoAP::Message ver=1, tt=:ack, mcode=[2, 5], mid=866, options={:max_age=>60, :token=>150, :etag=>[16135160785136240028], :content_format=>40, :block2=>226}, payload=\"\\\";ct=50,</5>;rt=\\\"5\\\";ct=50\">"
-      def delete(hostname, port, uri, options = {})
+      # @return CoAP::Message
+      def delete(host, port, path, payload = nil, options = {})
         @retry_count = 0
-        client(hostname, port, uri, :delete, nil, options)
+        client(host, port, path, :delete, payload, options)
       end
 
-      # coap observe
+      # DELETE by URI
       #
-      # @param url coap scheme + authority url eg coap://coap.me:5683/time
-      # @param options coap options
-      # @param callback method to call with the observe data eg. observe_callback(payload, socket)
+      # @param  uri       URI
+      # @param  payload   Payload
+      # @param  options   Options
       #
-      def observe_by_url(hostname, port, uri, callback, options = {})
-        url_decoded = CoAP.scheme_and_authority_decode(url)
-
-        @logger.debug 'url decoded: ' + url_decoded.inspect
-        fail ArgumentError, 'Invalid URL' if url_decoded.nil?
-
-        observe(url_decoded[0], url_decoded[1], url_decoded[2], callback, options)
+      # @return CoAP::Message
+      def delete_by_url(uri, payload = nil, options = {})
+        delete(*decode_uri(uri), payload, options)
       end
 
-      # coap observe
+      # OBSERVE
       #
-      # @param hostname hostname or ip address
-      # @param port port to connect to
-      # @param uri eg /.well-known/core
-      # @param options coap options
-      # @param callback method to call with the observe data eg. observe_callback(payload, socket)
+      # @param  host      Destination host
+      # @param  port      Destination port
+      # @param  path      Path
+      # @param  callback  Method to call with the observe data. Must provide arguments payload and socket.
+      # @param  payload   Payload
+      # @param  options   Options
       #
-      def observe(hostname, port, uri, callback, options = {})
+      def observe(host, port, path, callback, payload = nil, options = {})
         options[:observe] = 0
-        client(hostname, port, uri, :get, nil, options, callback)
+        client(host, port, path, :get, payload, options, callback)
       end
 
-      # custom client for special use
+      # OBSERVE by URI
       #
-      # @param url coap scheme + authority url eg coap://coap.me:5683/time
-      # @param method string get post put delete etc
-      # @param payload message payload
-      # @param options coap options
+      # @param  uri       URI
+      # @param  payload   Payload
+      # @param  options   Options
+      # @param  payload   Payload
+      # @param  callback  Method to call with the observe data. Must provide arguments payload and socket.
       #
-      # @return CoAP::Message #<struct CoAP::Message ver=1, tt=:ack, mcode=[2, 5], mid=866, options={:max_age=>60, :token=>150, :etag=>[16135160785136240028], :content_format=>40, :block2=>226}, payload=\"\\\";ct=50,</5>;rt=\\\"5\\\";ct=50\">"
-      def custom(url, method, payload = nil, options = {})
-
-        url_decoded = decode_url url
-        client(url_decoded[0], url_decoded[1], url_decoded[2], method.to_sym, payload, options)
-
+      def observe_by_url(hostname, port, uri, callback, payload = nil, options = {})
+        observe(*decode_uri(uri), callback, payload, options)
       end
 
       private
 
       def client(hostname, port, uri, method, payload, options, observe_callback = nil)
-
         # set hostname + port only one time on multiple requests
         hostname.nil? ? (hostname = @hostname unless @hostname.nil?) : @hostname = hostname
         port.nil? ? (port = @port unless @port.nil?) : @port = port
@@ -360,6 +310,16 @@ module CoRE
         fail ArgumentError, 'wrong token returned' if recv_parsed.options[:token] != token # create own error class
 
         recv_parsed
+      end
+
+      # Decode CoAP URIs.
+      def decode_uri(uri)
+        uri = CoAP.scheme_and_authority_decode(uri)
+
+        @logger.debug 'URI decoded: ' + uri.inspect
+        fail ArgumentError, 'Invalid URL' if uri.nil?
+
+        uri
       end
     end
   end

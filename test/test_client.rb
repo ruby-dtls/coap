@@ -183,16 +183,7 @@ class TestClient < Minitest::Unit::TestCase
     assert_equal('Übergrößenträger = 特大の人 = 超大航母', answer.payload.force_encoding('utf-8'))
   end
 
-  def test_client_custom_call
-    client = CoRE::CoAP::Client.new
-    answer = client.custom('coap://coap.me/bl%C3%A5b%C3%A6rsyltet%C3%B8y', 'get')
-    assert_equal(2, answer.mcode[0])
-    assert_equal(5, answer.mcode[1])
-    assert_equal('Übergrößenträger = 特大の人 = 超大航母', answer.payload.force_encoding('utf-8'))
-  end
-
   def test_multi_request_without_hostname_port
-
     client = CoRE::CoAP::Client.new
     client.hostname = 'coap.me'
     client.port = 5683

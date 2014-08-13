@@ -1,0 +1,65 @@
+#!/usr/bin/env ruby
+
+require 'getoptlong'
+require 'pp'
+require 'uri'
+
+require_relative '../lib/coap'
+
+def observe_callback(data, socket)
+  if $DEBUG
+    pp socket.inspect, data.inspect
+  end
+end
+def usage
+  $stderr.puts "Usage: #{File.basename($0)} [options] <method> <uri>\n"
+  exit 1
+end
+
+METHODS = CoAP::METHODS + [:observe]
+
+opts = GetoptLong.new(
+  ['--debug', '-d', GetoptLong::NO_ARGUMENT ],
+  ['--help',  '-h', GetoptLong::NO_ARGUMENT ]
+)
+
+$DEBUG = false
+
+opts.each do |opt, arg|
+  case opt
+  when '--debug'
+    $DEBUG = true
+  when '--help'
+    usage
+  end
+end
+
+usage if ARGV.size != 2
+
+method = ARGV.shift
+uri    = ARGV.shift
+
+method = method.to_sym
+usage unless METHODS.include? method
+
+uri = URI.parse(uri)
+usage unless uri.scheme[/^coap/]
+
+client = CoAP::Client.new
+
+case method
+when :get
+  pp client.get_by_uri(uri)
+
+when :post
+  pp client.post_by_uri(uri, payload)
+
+when :put
+  pp client.put_by_uri(uri, payload)
+
+when :delete
+  pp client.delete_by_uri(uri)
+
+when :observe
+  pp client.observe_by_uri(uri, {}, method(:observe_callback))
+end
