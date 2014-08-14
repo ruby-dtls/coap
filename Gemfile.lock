@@ -42,5 +42,5 @@ DEPENDENCIES
   bundler (~> 1.6)
   coap!
   coveralls (~> 0.7)
-  faker (~> 1.4.2)
+  faker (~> 1.4)
   rake (~> 10.3)

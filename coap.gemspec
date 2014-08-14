@@ -20,9 +20,6 @@ Gem::Specification.new do |s|
   s.authors  = ['Carsten Bormann', 'Simon Frerichs', 'henning mueller']
   s.email    = 'henning@orgizm.net'
 
-# s.files = Dir.glob('{bin,lib}/**/*')
-# s.executables = Dir.glob('bin/**').map { |x| x[4..-1] }
-
   s.files         = `git ls-files`.split($/)
   s.executables   = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
   s.test_files    = s.files.grep(%r{^(test|spec|features)/})
@@ -30,7 +27,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'bundler',   '~> 1.6'
   s.add_development_dependency 'coveralls', '~> 0.7'
-  s.add_development_dependency 'faker',     '~> 1.4.2'
+  s.add_development_dependency 'faker',     '~> 1.4'
   s.add_development_dependency 'rake',      '~> 10.3'
 
   s.add_dependency 'resolv-ipv6favor', '~> 0'
