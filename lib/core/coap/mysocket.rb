@@ -1,46 +1,30 @@
 module CoRE
   module CoAP
     class MySocket
-
       attr_writer :socket_type, :ack_timeout
 
       def initialize
         @logger = CoAP.logger
-
       end
 
-      def connect(hostname, port)
-        # hostname or ipv4/ipv6 address?
-        address = IPAddr.new(hostname)
-        return connect_socket(address, port)
-
-      rescue IPAddr::InvalidAddressError
-        # got a hostname, trying to resolv
-
-        addresses = IPv6FavorResolv.getaddresses(hostname)
+      def connect(host, port)
+        address = IPAddr.new(host)
+        connect_socket(address, port)
+      rescue ArgumentError # host is not ip address
+        addresses = IPv6FavorResolv.getaddresses(host)
 
         raise Resolv::ResolvError if addresses.empty?
 
         addresses.each do |address|
-
           begin
-
-            # transform to IPAddr object
+            # Transform to IPAddr object
             address = IPAddr.new(address.to_s)
-            return connect_socket(address, port)
-
+            connect_socket(address, port)
           rescue Errno::EHOSTUNREACH
-
             @logger.fatal 'Address unreachable: ' + address.to_s if $DEBUG
-            # try next one if exists
-
           rescue Errno::ENETUNREACH
-
             @logger.fatal 'Net unreachable: ' + address.to_s if $DEBUG
-            # try next one if exists
-
           end
-
         end
       end
 
@@ -49,18 +33,17 @@ module CoRE
       end
 
       def receive(timeout = nil, retry_count = 0)
-        timeout = @ack_timeout**(retry_count + 1) if timeout.nil? # timeout doubles
+        timeout = @ack_timeout**(retry_count + 1) if timeout.nil?
 
         @logger.debug @socket.peeraddr.inspect
         @logger.debug @socket.addr.inspect
-        @logger.debug 'AAA Timeout: ' + timeout.to_s
+        @logger.debug 'Current timeout value: ' + timeout.to_s
 
         recv_data = nil
         status = Timeout.timeout(timeout) do
           recv_data = @socket.recvfrom(1024)
         end
 
-        # pp recv_data
         recv_data
       end
 
