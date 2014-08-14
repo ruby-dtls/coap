@@ -63,5 +63,5 @@ when :delete
   pp client.delete_by_uri(uri)
 
 when :observe
-  pp client.observe_by_uri(uri, {}, method(:observe_callback))
+  pp client.observe_by_uri(uri, method(:observe_callback))
 end
