@@ -1,9 +1,7 @@
-# -*- encoding: utf-8 -*-
 require_relative 'coap_test_helper'
 
-# BAD: tests rely on working connection to coap.me (!)
-# TODO: rewrite tests with local coap server
-# test
+# TODO Rewrite tests with local coap server!
+
 $observe_count = 0
 PAYLOAD = Random.rand(999).to_s + 'TESTLorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc,Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nuncLorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc,Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc,Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc,Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc,Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc,Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nuncTEST'
 
@@ -45,7 +43,6 @@ class TestClient < Minitest::Unit::TestCase
   end
 
   def test_multi_request
-
     x = Time.now
     client = CoRE::CoAP::Client.new
     assert_raises RuntimeError do
@@ -59,41 +56,39 @@ class TestClient < Minitest::Unit::TestCase
     duration = Time.now - x
     #assert_operator duration, :>, 0
     #assert_operator duration, :<, 5
-
   end
 
   def test_client_connection_dns_problems
-
     # invalid hostname
     client = CoRE::CoAP::Client.new
     assert_raises Resolv::ResolvError do
       client.get('coapunknown.mexyz', 5683, '/hello')
     end
-
   end
 
   def test_max_retransmit_ack_timeout
+    client = CoRE::CoAP::Client.new(max_retransmit: 0, ack_timeout: 30)
 
-    client = CoRE::CoAP::Client.new(256, 0, 30)
     duration = 0
     x = Time.now
     assert_raises RuntimeError do
-      answer = client.get('bongo.xmorpheus.de', 1194, '/hello')
+      answer = client.get('eternium.orgizm.net', 1195, '/hello')
     end
+
     duration = Time.now - x
     assert_operator duration, :>, 25
     assert_operator duration, :<, 35
 
-    client = CoRE::CoAP::Client.new(256, 1, 30)
+    client = CoRE::CoAP::Client.new(max_retransmit: 1, ack_timeout: 30)
     duration = 0
     x = Time.now
     assert_raises RuntimeError do
-      answer = client.get('bongo.xmorpheus.de', 1194, '/hello')
+      answer = client.get('eternium.orgizm.net', 1195, '/hello')
     end
+
     duration = Time.now - x
     assert_operator duration, :>, 55
     assert_operator duration, :<, 110
-
   end
 
   def test_client_arguments
@@ -103,52 +98,44 @@ class TestClient < Minitest::Unit::TestCase
       client.get('coap.me', 15_683, '/hello')
     end
 
-    # empty uri
+    # empty path
     client = CoRE::CoAP::Client.new
     assert_raises ArgumentError do
       answer = client.get('coap.me', 5683, '')
     end
 
-    # empty hostname
+    # empty host
     client = CoRE::CoAP::Client.new
     assert_raises ArgumentError do
       answer = client.get('', 15_683, '/hello')
     end
 
-    # missing port
-    client = CoRE::CoAP::Client.new
-    assert_raises ArgumentError do
-      answer = client.get('coap.me', nil, '/hello')
-    end
-
     # string port
     client = CoRE::CoAP::Client.new
     assert_raises ArgumentError do
-      answer = client.get('coap.me', 'i m a sring', '/hello')
+      answer = client.get('coap.me', 'sring', '/hello')
     end
 
     # empty payload
     client = CoRE::CoAP::Client.new
-    @suchEmpty = ''
     assert_raises ArgumentError do
-      answer = client.post('coap.me', 5683, '/large-create', @suchEmpty)
+      answer = client.post('coap.me', 5683, '/large-create', '')
     end
-
   end
 
-  def test_client_by_url
+  def test_client_by_uri
     client = CoRE::CoAP::Client.new
-    answer = client.get_by_url('coap://coap.me:5683/hello')
+    answer = client.get_by_uri('coap://coap.me:5683/hello')
     assert_equal('world', answer.payload)
 
-    # broken url
+    # broken uri
     client = CoRE::CoAP::Client.new
     assert_raises ArgumentError do
-      answer = client.get_by_url('coap:/#/coap.me:5683/hello')
+      answer = client.get_by_uri('coap:/#/coap.me:5683/hello')
     end
   end
 
-  # need to test payload
+  # TODO test payload
 
   def test_client_post
     client = CoRE::CoAP::Client.new
@@ -158,7 +145,7 @@ class TestClient < Minitest::Unit::TestCase
     assert_equal('POST OK', answer.payload)
   end
 
-    # basic test put
+  # basic test put
   def test_client_put
     client = CoRE::CoAP::Client.new
     answer = client.put('coap.me', 5683, '/test', 'TD_COAP_CORE_03')
@@ -177,7 +164,7 @@ class TestClient < Minitest::Unit::TestCase
 
   def test_client_sönderzeichen
     client = CoRE::CoAP::Client.new
-    answer = client.get_by_url('coap://coap.me/bl%C3%A5b%C3%A6rsyltet%C3%B8y')
+    answer = client.get_by_uri('coap://coap.me/bl%C3%A5b%C3%A6rsyltet%C3%B8y')
     assert_equal(2, answer.mcode[0])
     assert_equal(5, answer.mcode[1])
     assert_equal('Übergrößenträger = 特大の人 = 超大航母', answer.payload.force_encoding('utf-8'))
@@ -185,7 +172,7 @@ class TestClient < Minitest::Unit::TestCase
 
   def test_multi_request_without_hostname_port
     client = CoRE::CoAP::Client.new
-    client.hostname = 'coap.me'
+    client.host = 'coap.me'
     client.port = 5683
     answer = client.get(nil, nil, '/hello')
     assert_equal(2, answer.mcode[0])
@@ -217,11 +204,10 @@ class TestClient < Minitest::Unit::TestCase
     assert_equal(2, answer.mcode[0])
     assert_equal(5, answer.mcode[1])
     assert_equal('world', answer.payload)
-
   end
 
   def test_initialize
-    client = CoRE::CoAP::Client.new(16, 4, 2, 'coap.me', 5683)
+    client = CoRE::CoAP::Client.new(host: 'coap.me', max_payload: 16)
     answer = client.get(nil, nil, '/large')
     assert_equal(2, answer.mcode[0])
     assert_equal(5, answer.mcode[1])

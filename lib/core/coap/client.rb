@@ -2,31 +2,23 @@ module CoRE
   module CoAP
     # CoAP client library
     class Client
-      attr_accessor :max_payload, :max_retransmit, :ack_timeout, :host, :port
+      attr_accessor :max_payload, :max_retransmit, :ack_timeout, :host, :port,
+        :socket
 
       # @param  options   Valid options are (all optional): max_payload (maximum payload size, default 256), max_retransmit (maximum retransmission count, default 4), ack_timeout (timeout for ACK responses, default: 2), host (destination host), post (destination port, default 5683).
       def initialize(options = {})
-        default_options = {
-          max_payload:    256,
-          max_retransmit: 4,
-          ack_timeout:    2
-        }
+        @max_payload    = options[:max_payload]     || 256
+        @max_retransmit = options[:max_retransmit]  || 4
+        @ack_timeout    = options[:ack_timeout]     || 2
 
-        options = default_options.merge(options)
+        @host = options[:host]
+        @port = options[:port] || 5683
 
-        @max_payload    = options[:max_payload]
-        @max_retransmit = options[:max_retransmit]
-        @ack_timeout    = options[:ack_timeout]
-
-        @host = options[:hostname]
-        @port = options[:port]
-
-        # dont change the following stuff
         @retry_count = 0
 
-        @MySocket = MySocket.new
-        @MySocket.socket_type = UDPSocket
-        @MySocket.ack_timeout = @ack_timeout
+        @socket = MySocket.new
+        @socket.socket_type = UDPSocket
+        @socket.ack_timeout = @ack_timeout
 
         @logger = CoAP.logger
       end
@@ -34,9 +26,9 @@ module CoRE
       # Enable DTLS Socket
       # Needs CoDTLS Gem
       def use_dtls
-        @MySocket = MySocket.new
-        @MySocket.socket_type = CoDTLS::SecureSocket
-        @MySocket.ack_timeout = @ack_timeout
+        @socket = MySocket.new
+        @socket.socket_type = CoDTLS::SecureSocket
+        @socket.ack_timeout = @ack_timeout
 
         self
       end
@@ -62,7 +54,7 @@ module CoRE
         client(host, port, path, :get, payload, options)
       end
 
-      # GET by URI
+      # GET by aRI
       #
       # @param  uri       URI
       # @param  payload   Payload
@@ -84,7 +76,7 @@ module CoRE
       # @return CoAP::Message
       def post(host, port, path, payload = nil, options = {})
         @retry_count = 0
-        client(host, port, uri, :post, payload, options)
+        client(host, port, path, :post, payload, options)
       end
 
       # POST by URI
@@ -144,7 +136,7 @@ module CoRE
       # @param  options   Options
       #
       # @return CoAP::Message
-      def delete_by_url(uri, payload = nil, options = {})
+      def delete_by_uri(uri, payload = nil, options = {})
         delete(*decode_uri(uri), payload, options)
       end
 
@@ -170,24 +162,24 @@ module CoRE
       # @param  payload   Payload
       # @param  callback  Method to call with the observe data. Must provide arguments payload and socket.
       #
-      def observe_by_url(hostname, port, uri, callback, payload = nil, options = {})
+      def observe_by_uri(uri, callback, payload = nil, options = {})
         observe(*decode_uri(uri), callback, payload, options)
       end
 
       private
 
-      def client(hostname, port, uri, method, payload, options, observe_callback = nil)
-        # set hostname + port only one time on multiple requests
-        hostname.nil? ? (hostname = @hostname unless @hostname.nil?) : @hostname = hostname
+      def client(host, port, path, method, payload, options, observe_callback = nil)
+        # Set host and port only one time on multiple requests
+        host.nil? ? (host = @host unless @host.nil?) : @host = host
         port.nil? ? (port = @port unless @port.nil?) : @port = port
 
         # Error handling for paramaters
-        fail ArgumentError, 'hostname missing' if hostname.nil? || hostname.empty?
+        fail ArgumentError, 'host missing' if host.nil? || host.empty?
         fail ArgumentError, 'port missing' if port.nil?
-        fail ArgumentError, 'port must ba an integer' unless port.is_a? Integer
-        fail ArgumentError, 'uri missing' if uri.nil? || uri.empty?
+        fail ArgumentError, 'port must be an integer' unless port.is_a? Integer
+        fail ArgumentError, 'path missing' if path.nil? || path.empty?
         fail ArgumentError, 'payload must be a string' unless payload.is_a? String unless payload.nil?
-        fail ArgumentError, 'payload shouldnt be empty ' if payload.empty? unless payload.nil?
+        fail ArgumentError, "payload shouldn't be empty" if payload.empty? unless payload.nil?
 
         # generate random message id
         mid = Random.rand(999)
@@ -206,7 +198,7 @@ module CoRE
         # create coap message struct
         message = Message.new(:con, method, mid, nil, {})
         # , block2: Block.encode_hash(block2)
-        message.options = { uri_path: CoAP.path_decode(uri), token: token }
+        message.options = { uri_path: CoAP.path_decode(path), token: token }
         message.options[:block2] = Block.encode_hash(block2) if @max_payload != 256 # temp fix to disable early negotation
         message.payload = payload unless payload.nil?
 
@@ -237,16 +229,16 @@ module CoRE
         @logger.debug '### CoAP Send Data ###'
 
         # connect via udp/dtls
-        @MySocket.connect hostname, port
-        @MySocket.send message.to_wire, 0
+        @socket.connect host, port
+        @socket.send message.to_wire, 0
 
         # send message + retry
         begin
-          recv_data = @MySocket.receive
+          recv_data = @socket.receive
         rescue Timeout::Error
           @retry_count += 1
           raise 'Retry Timeout ' + @retry_count.to_s if @retry_count > @max_retransmit
-          return client(hostname, port, uri, method, payload, options, observe_callback)
+          return client(host, port, path, method, payload, options, observe_callback)
         end
 
         # parse recv data
@@ -261,7 +253,7 @@ module CoRE
         # payload is not fully transmitted
         if block1[:more]
           fail 'Max Recursion' if @retry_count > 10
-          return client(hostname, port, uri, method, payload, message.options)
+          return client(host, port, path, method, payload, message.options)
         end
 
         # separate ?
@@ -269,7 +261,7 @@ module CoRE
           @logger.debug '### SEPARATE REQUEST ###'
 
           # wait for answer ...
-          recv_data = @MySocket.receive(600, @retry_count)
+          recv_data = @socket.receive(600, @retry_count)
           recv_parsed = CoAP.parse(recv_data[0].force_encoding('BINARY'))
 
           # debug functions
@@ -281,7 +273,7 @@ module CoRE
           if recv_parsed.tt == :con
             message = Message.new(:ack, 0, recv_parsed.mid, nil, {})
             message.options = { token: recv_parsed.options[:token] }
-            @MySocket.send message.to_wire, 0
+            @socket.send message.to_wire, 0
           end
 
           @logger.debug '### SEPARATE REQUEST END ###'
@@ -296,14 +288,14 @@ module CoRE
           options.delete(:block1) # end block1
           options[:block2] = Block.encode_hash(block2)
           fail 'Max Recursion' if @retry_count > 50
-          local_recv_parsed = client(hostname, port, uri, method, nil, options)
+          local_recv_parsed = client(host, port, path, method, nil, options)
           recv_parsed.payload << local_recv_parsed.payload unless local_recv_parsed.nil?
         end
 
         # do we need to observe?
         if recv_parsed.options[:observe]
           @Observer = CoAP::Observer.new
-          @Observer.observe(recv_parsed, recv_data, observe_callback, @MySocket)
+          @Observer.observe(recv_parsed, recv_data, observe_callback, @socket)
         end
 
         # this is bad
@@ -317,7 +309,7 @@ module CoRE
         uri = CoAP.scheme_and_authority_decode(uri)
 
         @logger.debug 'URI decoded: ' + uri.inspect
-        fail ArgumentError, 'Invalid URL' if uri.nil?
+        fail ArgumentError, 'Invalid URI' if uri.nil?
 
         uri
       end
