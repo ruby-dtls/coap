@@ -3,6 +3,7 @@ Coveralls.wear!
 
 require 'test/unit'
 require 'logger'
+require 'faker'
 
 require 'core.rb'
 
