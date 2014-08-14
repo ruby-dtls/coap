@@ -42,7 +42,9 @@ uri    = ARGV.shift
 method = method.to_sym
 usage unless METHODS.include? method
 
+uri = 'coap://' + uri unless uri[/^coap[s]?:\/\//]
 uri = URI.parse(uri)
+
 usage unless uri.scheme[/^coap/]
 
 client = CoAP::Client.new

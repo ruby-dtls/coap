@@ -306,7 +306,7 @@ module CoRE
 
       # Decode CoAP URIs.
       def decode_uri(uri)
-        uri = CoAP.scheme_and_authority_decode(uri)
+        uri = CoAP.scheme_and_authority_decode(uri.to_s)
 
         @logger.debug 'URI decoded: ' + uri.inspect
         fail ArgumentError, 'Invalid URI' if uri.nil?
