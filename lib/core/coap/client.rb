@@ -33,11 +33,11 @@ module CoRE
         self
       end
 
-      def chunk(string, size)
+      def chunkify(string)
         chunks = []
-        string.bytes.each_slice(size) { |i| chunks << i.pack('C*') }
+        size = 2**((Math.log2(@max_payload).floor - 4) + 4)
+        string.bytes.each_slice(size) { |s| chunks << s.pack('C*') }
         chunks
-        # string.scan(/.{1,#{size}}/)
       end
 
       # GET
@@ -149,6 +149,7 @@ module CoRE
       # @param  payload   Payload
       # @param  options   Options
       #
+      # @return CoAP::Message
       def observe(host, port, path, callback, payload = nil, options = {})
         options[:observe] = 0
         client(host, port, path, :get, payload, options, callback)
@@ -162,6 +163,7 @@ module CoRE
       # @param  payload   Payload
       # @param  callback  Method to call with the observe data. Must provide arguments payload and socket.
       #
+      # @return CoAP::Message
       def observe_by_uri(uri, callback, payload = nil, options = {})
         observe(*decode_uri(uri), callback, payload, options)
       end
@@ -173,102 +175,91 @@ module CoRE
         host.nil? ? (host = @host unless @host.nil?) : @host = host
         port.nil? ? (port = @port unless @port.nil?) : @port = port
 
-        # Error handling for paramaters
-        fail ArgumentError, 'host missing' if host.nil? || host.empty?
-        fail ArgumentError, 'port missing' if port.nil?
-        fail ArgumentError, 'port must be an integer' unless port.is_a? Integer
-        fail ArgumentError, 'path missing' if path.nil? || path.empty?
-        fail ArgumentError, 'payload must be a string' unless payload.is_a? String unless payload.nil?
-        fail ArgumentError, "payload shouldn't be empty" if payload.empty? unless payload.nil?
+        validate_arguments!(host, port, path, payload)
 
-        # generate random message id
-        mid = Random.rand(999)
-        token = Random.rand(256)
         szx = Math.log2(@max_payload).floor - 4
 
         # initialize block 2 with payload size
         block2 = Block.initialize(0, false, szx) 
 
-        # initialize block1 if set
-        block1 = options[:block1].nil? ? Block.initialize(0, false, szx) : Block.decode(options[:block1])
+        # Initialize block1 if set.
+        block1 = if options[:block1].nil?
+          Block.initialize(0, false, szx)
+        else
+          Block.decode(options[:block1])
+        end
 
-        # initialize chunks if payload size > max_payload
-        chunks = chunk(payload, 2**((Math.log2(@max_payload).floor - 4) + 4)) unless payload.nil?
+        # Initialize chunks if payload size > max_payload.
+        chunks = chunkify(payload) unless payload.nil?
 
-        # create coap message struct
-        message = Message.new(:con, method, mid, nil, {})
-        # , block2: Block.encode_hash(block2)
-        message.options = { uri_path: CoAP.path_decode(path), token: token }
-        message.options[:block2] = Block.encode_hash(block2) if @max_payload != 256 # temp fix to disable early negotation
-        message.payload = payload unless payload.nil?
+        # Create CoAP message struct.
+        message = initialize_message(method, host, port, path, payload, block2)
 
-        ### initialize stuff end
-
-        # if chunks.size 1 > we need to use block1
-        if !payload.nil? and chunks.size > 1
-          # increase block number
+        # If more than 1 chunk, we need to use block1.
+        if !payload.nil? && chunks.size > 1
+          # Increase block number.
           block1[:num] += 1 unless options[:block1].nil?
-          # more ?
-          block1[:more] = chunks.size > block1[:num] + 1
-          chunks.size > block1[:num] + 1 ? message.options.delete(:block2) : block1[:more] = false
-          # set final payload
+
+          # More chunks?
+          if chunks.size > block1[:num] + 1
+            block1[:more] = true
+            message.options.delete(:block2)
+          else
+            block1[:more] = false
+          end
+
+          # Set final payload.
           message.payload = chunks[block1[:num]]
-          # set message option
+
+          # Set block1 message option.
           message.options[:block1] = Block.encode_hash(block1)
         end
 
-        # preserve user options
+        # Preserve user options.
         message.options[:block2] = options[:block2] unless options[:block2] == nil
         message.options[:observe] = options[:observe] unless options[:observe] == nil
         message.options.merge(options)
 
-        # debug functions
-        @logger.debug '### CoAP Send Data ###'
-        #@logger.debug message.to_s.hexdump
-        @logger.debug message.inspect
-        @logger.debug '### CoAP Send Data ###'
+        log_message(:sending_message, message)
 
-        # connect via udp/dtls
+        # Connect via UDP/DTLS.
         @socket.connect host, port
-        @socket.send message.to_wire, 0
 
-        # send message + retry
+        # Wait for answer and retry sending message if timeout rached.
         begin
+          @socket.send message.to_wire
           recv_data = @socket.receive
         rescue Timeout::Error
           @retry_count += 1
-          raise 'Retry Timeout ' + @retry_count.to_s if @retry_count > @max_retransmit
-          return client(host, port, path, method, payload, options, observe_callback)
+
+          if @retry_count > @max_retransmit
+            raise "Maximum retransmission count reached (#{@max_retransmit})."
+          end
+
+          retry
         end
 
-        # parse recv data
+        # Parse received data.
         recv_parsed = CoAP.parse(recv_data[0].force_encoding('BINARY'))
 
-        # debug functions
-        @logger.debug '### CoAP Received Data ###'
-        #@logger.debug recv_parsed.to_s.hexdump
-        @logger.debug recv_parsed.inspect
-        @logger.debug '### CoAP Received Data ###'
+        log_message(:received_message, recv_parsed)
 
-        # payload is not fully transmitted
+        # Payload is not fully transmitted.
+        # TODO Get rid of nasty recursion.
         if block1[:more]
           fail 'Max Recursion' if @retry_count > 10
           return client(host, port, path, method, payload, message.options)
         end
 
-        # separate ?
-        if recv_parsed.tt == :ack && recv_parsed.payload.empty? && recv_parsed.mid == mid && recv_parsed.mcode[0] == 0 && recv_parsed.mcode[1] == 0
+        # Separated?
+        if recv_parsed.tt == :ack && recv_parsed.payload.empty? && recv_parsed.mid == message.mid && recv_parsed.mcode[0] == 0 && recv_parsed.mcode[1] == 0
           @logger.debug '### SEPARATE REQUEST ###'
 
-          # wait for answer ...
+          # Wait for answer...
           recv_data = @socket.receive(600, @retry_count)
           recv_parsed = CoAP.parse(recv_data[0].force_encoding('BINARY'))
 
-          # debug functions
-          @logger.debug '### CoAP SEPARAT Data ###'
-          #@logger.debug recv_parsed.to_s.hexdump
-          @logger.debug recv_parsed.inspect
-          @logger.debug '### CoAP SEPARAT Data ###'
+          log_message(:seperated_data, recv_parsed)
 
           if recv_parsed.tt == :con
             message = Message.new(:ack, 0, recv_parsed.mid, nil, {})
@@ -279,7 +270,7 @@ module CoRE
           @logger.debug '### SEPARATE REQUEST END ###'
         end
 
-        # test for more block2 payload
+        # Test for more block2 payload.
         block2 = Block.decode(recv_parsed.options[:block2])
 
         if block2[:more]
@@ -287,19 +278,26 @@ module CoRE
 
           options.delete(:block1) # end block1
           options[:block2] = Block.encode_hash(block2)
+
           fail 'Max Recursion' if @retry_count > 50
+
           local_recv_parsed = client(host, port, path, method, nil, options)
-          recv_parsed.payload << local_recv_parsed.payload unless local_recv_parsed.nil?
+
+          unless local_recv_parsed.nil?
+            recv_parsed.payload << local_recv_parsed.payload
+          end
         end
 
-        # do we need to observe?
+        # Token of received message mismatches.
+        if recv_parsed.options[:token] != message.options[:token]
+          fail ArgumentError, 'Received message with wrong token.'
+        end
+
+        # Do we need to observe?
         if recv_parsed.options[:observe]
           @Observer = CoAP::Observer.new
           @Observer.observe(recv_parsed, recv_data, observe_callback, @socket)
         end
-
-        # this is bad
-        fail ArgumentError, 'wrong token returned' if recv_parsed.options[:token] != token # create own error class
 
         recv_parsed
       end
@@ -312,6 +310,51 @@ module CoRE
         fail ArgumentError, 'Invalid URI' if uri.nil?
 
         uri
+      end
+
+      def initialize_message(method, host, port, path, payload = nil, block2 = nil)
+        mid   = SecureRandom.random_number(999)
+        token = SecureRandom.random_number(256)
+
+        options = {
+          uri_path: CoAP.path_decode(path),
+          token: token
+        }
+
+        message = Message.new(:con, method, mid, payload, options)
+
+        # Temporary fix to disable early negotiation.
+        if !block2.nil? && @may_payload != 256
+          message.options[:block2] = Block.encode_hash(block2)
+        end
+
+        message
+      end
+
+      # Log message to debug log.
+      def log_message(text, message)
+        @logger.debug '###' + text.to_s.upcase.gsub('_', ' ')
+        @logger.debug message.inspect
+        @logger.debug message.to_s.hexdump if $DEBUG
+      end
+
+      # Raise ArgumentError exceptions on wrong client method arguments.
+      def validate_arguments!(host, port, path, payload)
+        if host.nil? || host.empty?
+          fail ArgumentError, 'Argument «host» missing.'
+        end
+
+        if port.nil? || !port.is_a?(Integer)
+          fail ArgumentError, 'Argument «port» missing or not an Integer.'
+        end
+
+        if path.nil? || path.empty?
+          fail ArgumentError, 'Argument «path» missing.'
+        end
+
+        if !payload.nil? && (payload.empty? || !payload.is_a?(String))
+          fail ArgumentError, 'Argument «payload» must be a non-emtpy String'
+        end
       end
     end
   end

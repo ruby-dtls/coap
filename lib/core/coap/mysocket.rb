@@ -28,7 +28,7 @@ module CoRE
         end
       end
 
-      def send(data, flags)
+      def send(data, flags = 0)
         @socket.send(data, flags)
       end
 

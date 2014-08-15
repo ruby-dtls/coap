@@ -25,7 +25,7 @@ module CoRE
           payload = h.delete(:payload) || args.shift || EMPTY
 
           unless args.empty?
-            raise 'CoRE::CoAP::Message.new: Either use Hash or all arguments.'
+            raise 'CoRE::CoAP::Message.new: Either specify Hash or all arguments.'
           end
 
           super(1, tt, mcode, mid, h, payload)
