@@ -16,20 +16,15 @@ module CoRE
 
         @retry_count = 0
 
-        @socket = MySocket.new
-        @socket.socket_type = UDPSocket
-        @socket.ack_timeout = @ack_timeout
+        set_socket(UDPSocket)
 
         @logger = CoAP.logger
       end
 
-      # Enable DTLS Socket
-      # Needs CoDTLS Gem
+      # Enable DTLS socket.
       def use_dtls
-        @socket = MySocket.new
-        @socket.socket_type = CoDTLS::SecureSocket
-        @socket.ack_timeout = @ack_timeout
-
+        require 'CoDTLS'
+        set_socket(CoDTLS::SecureSocket)
         self
       end
 
@@ -336,6 +331,12 @@ module CoRE
         @logger.debug '###' + text.to_s.upcase.gsub('_', ' ')
         @logger.debug message.inspect
         @logger.debug message.to_s.hexdump if $DEBUG
+      end
+
+      def set_socket(socket_class)
+        @socket = MySocket.new
+        @socket.socket_type = socket_class
+        @socket.ack_timeout = @ack_timeout
       end
 
       # Raise ArgumentError exceptions on wrong client method arguments.

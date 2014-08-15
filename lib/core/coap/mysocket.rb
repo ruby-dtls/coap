@@ -10,7 +10,7 @@ module CoRE
       def connect(host, port)
         address = IPAddr.new(host)
         connect_socket(address, port)
-      rescue ArgumentError # host is not ip address
+      rescue ArgumentError # host is not an IP address
         addresses = IPv6FavorResolv.getaddresses(host)
 
         raise Resolv::ResolvError if addresses.empty?
@@ -40,7 +40,7 @@ module CoRE
         @logger.debug 'Current timeout value: ' + timeout.to_s
 
         recv_data = nil
-        status = Timeout.timeout(timeout) do
+        Timeout.timeout(timeout) do
           recv_data = @socket.recvfrom(1024)
         end
 
@@ -56,7 +56,7 @@ module CoRE
           @socket = @socket_type.new
         end
 
-        # TODO: Error handling connection
+        # TODO Connection error handling.
         @socket.connect(address.to_s, port)
 
         @socket

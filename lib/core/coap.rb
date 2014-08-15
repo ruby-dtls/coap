@@ -23,7 +23,8 @@ require 'socket'
 require 'resolv-ipv6favor'
 require 'ipaddr'
 require 'timeout'
-#require 'CoDTLS'
+
+require_relative 'hexdump'
 
 require_relative 'coap/utility'
 require_relative 'coap/codification'
