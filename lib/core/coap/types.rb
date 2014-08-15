@@ -1,8 +1,6 @@
 module CoRE
   module CoAP
-    module PresenceAndTypes
-      # extend DeAndEncoding
-
+    module Types
       # Arrays that describe a specific option type:
       # [default value, length range, repeatable?, decoder, encoder]
 

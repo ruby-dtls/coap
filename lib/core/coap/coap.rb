@@ -8,7 +8,7 @@ module CoRE
 
     extend Utility
 
-    include DeAndEncoding
+    include Codification
     include Options
 
     EMPTY = empty_buffer.freeze

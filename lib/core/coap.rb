@@ -26,8 +26,8 @@ require 'timeout'
 #require 'CoDTLS'
 
 require_relative 'coap/utility'
-require_relative 'coap/de_and_encoding'
-require_relative 'coap/presence_and_types'
+require_relative 'coap/codification'
+require_relative 'coap/types'
 require_relative 'coap/options'
 
 require_relative 'coap/coap'

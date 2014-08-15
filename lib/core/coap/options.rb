@@ -1,7 +1,7 @@
 module CoRE
   module CoAP
     module Options
-      extend PresenceAndTypes
+      extend Types
 
       TOKEN_ON = 19
 
