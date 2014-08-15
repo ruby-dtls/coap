@@ -11,19 +11,30 @@ def observe_callback(data, socket)
     pp socket.inspect, data.inspect
   end
 end
+
 def usage
-  $stderr.puts "Usage: #{File.basename($0)} [options] <method> <uri>\n"
+  $stderr.puts <<EOF
+Usage: #{File.basename($0)} [options] <method> <uri>
+
+  --debug, -d                   Extra debug output.
+  --output, -o        <target>  Redirect payload output. Target can be "-" for
+                                STDOUT or a file path.
+  --payload, -p       <string>  Payload for POST and PUT as string.
+  --payload-file, -f  <file>    Read payload for POST and PUT from file.
+  --help, -h                    This usage message.
+
+EOF
   exit 1
 end
 
 METHODS = CoAP::METHODS + [:observe]
 
 opts = GetoptLong.new(
-  ['--debug',         '-d', GetoptLong::NO_ARGUMENT],
-  ['--output',        '-o', GetoptLong::REQUIRED_ARGUMENT],
-  ['--payload',       '-p', GetoptLong::REQUIRED_ARGUMENT],
-  ['--payload-file',  '-f', GetoptLong::REQUIRED_ARGUMENT],
-  ['--help',          '-h', GetoptLong::NO_ARGUMENT]
+  ['--debug',        '-d', GetoptLong::NO_ARGUMENT],
+  ['--output',       '-o', GetoptLong::REQUIRED_ARGUMENT],
+  ['--payload',      '-p', GetoptLong::REQUIRED_ARGUMENT],
+  ['--payload-file', '-f', GetoptLong::REQUIRED_ARGUMENT],
+  ['--help',         '-h', GetoptLong::NO_ARGUMENT]
 )
 
 $DEBUG  = false
