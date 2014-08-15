@@ -12,7 +12,7 @@ module CoRE
         @ack_timeout    = options[:ack_timeout]     || 2
 
         @host = options[:host]
-        @port = options[:port] || 5683
+        @port = options[:port] || CoAP::PORT
 
         @retry_count = 0
 

@@ -3,9 +3,6 @@
 
 module CoRE
   module CoAP
-    # BIN = Encoding::BINARY
-    # UTF8 = Encoding::UTF_8
-
     extend Utility
 
     include Codification
@@ -18,6 +15,8 @@ module CoRE
 
     METHODS = [nil, :get, :post, :put, :delete]
     METHODS_I = invert_into_hash(METHODS)
+
+    PORT = 5683
 
     # Shortcut: CoRE::CoAP::parse == CoRE::CoAP::Message.parse
     def self.parse(*args)

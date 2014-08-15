@@ -83,14 +83,14 @@ module CoRE
         port = Integer(port)
 
         scheme_and_authority = "coap://#{host}"
-        scheme_and_authority << ":#{port}" unless port == 5683
+        scheme_and_authority << ":#{port}" unless port == CoAP::PORT
         scheme_and_authority
       end
 
       def scheme_and_authority_decode(s)
         if s =~ %r{\A(?:coap://)((?:\[|%5B)([^\]]*)(?:\]|%5D)|([^:/]*))(:(\d+))?(/.*)?\z}i
           host = $2 || $3       # Should check syntax...
-          port = $5 || 5683
+          port = $5 || CoAP::PORT
           [host, port.to_i, $6]
         end
       end
