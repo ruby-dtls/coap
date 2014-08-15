@@ -8,15 +8,26 @@ module CoRE
         if args.size < 6
           h = {}
           h = args.pop.dup if args.last.is_a? Hash
+
           tt = h.delete(:tt) || args.shift
+
           mcode = h.delete(:mcode) || args.shift
+
           case mcode
-            when Integer; mcode = METHODS[mcode] || [mcode >> 5, mcode & 0x1f]
-            when Float; mcode = [mcode.to_i, (mcode * 100 % 100).round] # accept 2.05 and such
+            when Integer
+              mcode = METHODS[mcode] || [mcode >> 5, mcode & 0x1f]
+            when Float
+              mcode = [mcode.to_i, (mcode * 100 % 100).round] # Accept 2.05 and such
           end
+
           mid = h.delete(:mid) || args.shift
-          payload = h.delete(:payload) || args.shift || EMPTY # no payload = empty payload
-          raise "CoRE::CoAP::Message.new: hash or all args" unless args.empty?
+
+          payload = h.delete(:payload) || args.shift || EMPTY
+
+          unless args.empty?
+            raise 'CoRE::CoAP::Message.new: Either use Hash or all arguments.'
+          end
+
           super(1, tt, mcode, mid, h, payload)
         else
           super
@@ -37,19 +48,14 @@ module CoRE
       end
 
       def mcode_readable
-        case mcode
-        when Array
-          "#{mcode[0]}.#{"%02d" % mcode[1]}"
-        else
-          mcode.to_s
-        end
+        return "#{mcode[0]}.#{"%02d" % mcode[1]}" if mcode.is_a? Array
+        mcode.to_s
       end
 
       def prepare_options
         prepared_options = {}
         options.each do |k, v|
-          # puts "k = #{k.inspect}, oinfo_i = #{OPTIONS_I[k].inspect}"
-          if oinfo_i = OPTIONS_I[k]
+          if oinfo_i = CoAP::OPTIONS_I[k]
             onum, oname, defv, minmax, rep, _, encoder = *oinfo_i
             prepared_options[onum] = a = encoder.call(v)
             rep or a.size <= 1 or raise "repeated option #{oname} #{a.inspect}"
@@ -71,7 +77,7 @@ module CoRE
         prepared_options = prepare_options
         # puts "prepared_options: #{prepared_options}"
 
-        token = (prepared_options.delete(TOKEN_ON) || [nil])[0] || ''
+        token = (prepared_options.delete(CoAP::TOKEN_ON) || [nil])[0] || ''
         puts "TOKEN: #{token.inspect}" unless token
 
         b1 = 0x40 | TTYPES_I[tt] << 4 | token.bytesize
@@ -97,13 +103,13 @@ module CoRE
             result << [odelta1 | length1].pack("C")
             result << odelta2
             result << length2
-            result << v.dup.force_encoding(BIN)         # value
+            result << v.dup.force_encoding(CoAP::BIN)         # value
           end
         end
 
         if payload != ''
           result << 0xFF
-          result << payload.dup.force_encoding(BIN)
+          result << payload.dup.force_encoding(CoAP::BIN)
         end
 
         result
@@ -111,9 +117,9 @@ module CoRE
 
       def self.decode_options_and_put_together(b1, tt, mcode, mid, options, payload)
         # check and decode option values
-        decoded_options = DEFAULTING_OPTIONS.dup
+        decoded_options = CoAP::DEFAULTING_OPTIONS.dup
         options.each_pair do |k, v|
-          if oinfo = OPTIONS[k]
+          if oinfo = CoAP::OPTIONS[k]
             oname, _, minmax, repeatable, decoder, _ = *oinfo
             repeatable or v.size <= 1 or
               raise ArgumentError, "repeated unrepeatable option #{oname}"
@@ -178,7 +184,7 @@ module CoRE
           options[onumber] << oval
         end
 
-        options[TOKEN_ON] = [token] if token != ''
+        options[CoAP::TOKEN_ON] = [token] if token != ''
         
         # d.bytesize = more than all the rest...
         decode_options_and_put_together(b1, tt, mcode, mid, options,

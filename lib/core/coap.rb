@@ -13,7 +13,6 @@ module CoRE
 
     def logger= logger
       @logger.close unless @logger.nil?
-      
       @logger = logger
     end
   end
@@ -26,20 +25,15 @@ require 'ipaddr'
 require 'timeout'
 #require 'CoDTLS'
 
-require_relative 'coap/coap.rb'
-require_relative 'coap/message.rb'
-require_relative 'coap/version.rb'
-require_relative 'coap/block.rb'
-require_relative 'coap/mysocket.rb'
-require_relative 'coap/observer.rb'
-require_relative 'coap/client.rb'
+require_relative 'coap/utility'
+require_relative 'coap/de_and_encoding'
+require_relative 'coap/presence_and_types'
+require_relative 'coap/options'
 
-=begin
-require 'coap/coap.rb'
-require 'coap/message.rb'
-require 'coap/version.rb'
-require 'coap/block.rb'
-require 'coap/mysocket.rb'
-require 'coap/observer.rb'
-require 'coap/client.rb'
-=end
+require_relative 'coap/coap'
+require_relative 'coap/message'
+require_relative 'coap/version'
+require_relative 'coap/block'
+require_relative 'coap/mysocket'
+require_relative 'coap/observer'
+require_relative 'coap/client'
