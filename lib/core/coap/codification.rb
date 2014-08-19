@@ -96,11 +96,12 @@ module CoRE
       end
 
       def path_encode(uri_elements)
+        return '/' if uri_elements.nil? || uri_elements.empty?
         '/' + uri_elements.map { |el| uri_encode_element(el, PATH_ENCODED_RE) }.join('/')
       end
 
       def query_encode(query_elements)
-        return '' if query_elements.empty?
+        return '' if query_elements.nil? || query_elements.empty?
         '?' + query_elements.map { |el| uri_encode_element(el, QUERY_ENCODED_RE) }.join('&')
       end
 
