@@ -5,7 +5,12 @@ module CoRE
       attr_accessor :max_payload, :max_retransmit, :ack_timeout, :host, :port,
         :socket
 
-      # @param  options   Valid options are (all optional): max_payload (maximum payload size, default 256), max_retransmit (maximum retransmission count, default 4), ack_timeout (timeout for ACK responses, default: 2), host (destination host), post (destination port, default 5683).
+      # @param  options   Valid options are (all optional): max_payload
+      #                   (maximum payload size, default 256), max_retransmit
+      #                   (maximum retransmission count, default 4),
+      #                   ack_timeout (timeout for ACK responses, default: 2),
+      #                   host (destination host), post (destination port,
+      #                   default 5683).
       def initialize(options = {})
         @max_payload    = options[:max_payload]     || 256
         @max_retransmit = options[:max_retransmit]  || 4
@@ -140,7 +145,8 @@ module CoRE
       # @param  host      Destination host
       # @param  port      Destination port
       # @param  path      Path
-      # @param  callback  Method to call with the observe data. Must provide arguments payload and socket.
+      # @param  callback  Method to call with the observe data. Must provide
+      #                   arguments payload and socket.
       # @param  payload   Payload
       # @param  options   Options
       #
@@ -153,7 +159,8 @@ module CoRE
       # OBSERVE by URI
       #
       # @param  uri       URI
-      # @param  callback  Method to call with the observe data. Must provide arguments payload and socket.
+      # @param  callback  Method to call with the observe data. Must provide
+      #                   arguments payload and socket.
       # @param  payload   Payload
       # @param  options   Options
       #
