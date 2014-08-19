@@ -49,7 +49,7 @@ module CoRE
         client(host, port, path, :get, payload, options)
       end
 
-      # GET by aRI
+      # GET by URI
       #
       # @param  uri       URI
       # @param  payload   Payload
@@ -87,7 +87,7 @@ module CoRE
 
       # PUT
       #
-      # @param  hsot      Destination host
+      # @param  host      Destination host
       # @param  port      Destination port
       # @param  path      Path
       # @param  payload   Payload
@@ -153,10 +153,9 @@ module CoRE
       # OBSERVE by URI
       #
       # @param  uri       URI
+      # @param  callback  Method to call with the observe data. Must provide arguments payload and socket.
       # @param  payload   Payload
       # @param  options   Options
-      # @param  payload   Payload
-      # @param  callback  Method to call with the observe data. Must provide arguments payload and socket.
       #
       # @return CoAP::Message
       def observe_by_uri(uri, callback, payload = nil, options = {})
