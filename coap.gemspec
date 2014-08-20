@@ -28,6 +28,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'bundler',   '~> 1.6'
   s.add_development_dependency 'coveralls', '~> 0.7'
   s.add_development_dependency 'faker',     '~> 1.4'
+  s.add_development_dependency 'minitest',  '~> 5.4'
   s.add_development_dependency 'rake',      '~> 10.3'
 
   s.add_dependency 'resolv-ipv6favor', '~> 0'

@@ -1,7 +1,7 @@
 require 'coveralls'
 Coveralls.wear!
 
-require 'test/unit'
+require 'minitest/autorun'
 require 'logger'
 require 'faker'
 

@@ -1,11 +1,13 @@
-require_relative 'coap_test_helper'
+# encoding: utf-8
+
+require_relative 'helper'
 
 # TODO Rewrite tests with local coap server!
 
 PAYLOAD = Faker::Lorem.paragraphs(5).join("\n")
 PAYLOAD_UTF8 = '♥' + PAYLOAD
 
-class TestClient < Minitest::Unit::TestCase
+class TestClient < Minitest::Test
   @@observe_count = 0
 
   def observe_tester(data, socket)

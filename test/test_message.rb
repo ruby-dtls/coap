@@ -1,7 +1,8 @@
-# -*- encoding: utf-8 -*-
-require_relative 'coap_test_helper'
+# encoding: utf-8
+#
+require_relative 'helper'
 
-class TestMessage < Test::Unit::TestCase
+class TestMessage < Minitest::Test
   def test_number_of_bits_up_to
     assert_equal 0, CoRE::CoAP.number_of_bits_up_to(1)
     assert_equal 4, CoRE::CoAP.number_of_bits_up_to(16)
