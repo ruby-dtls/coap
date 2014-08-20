@@ -72,6 +72,14 @@ module CoRE
         prepared_options
       end
 
+      def to_s
+        s  = mcode_readable
+        s += ' '
+        s += Codification.path_encode(self.options[:uri_path])
+        s += ' '
+        s += Codification.query_encode(self.options[:uri_query])
+      end
+
       def to_wire
         # check and encode option values
         prepared_options = prepare_options

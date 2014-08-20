@@ -144,6 +144,10 @@ module CoRE
 
         a
       end
+
+      module_function :path_encode
+      module_function :query_encode
+      module_function :uri_encode_element
     end
   end
 end
