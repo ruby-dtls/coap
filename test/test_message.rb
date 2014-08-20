@@ -1,5 +1,5 @@
 # encoding: utf-8
-#
+
 require_relative 'helper'
 
 class TestMessage < Minitest::Test
@@ -63,7 +63,7 @@ class TestMessage < Minitest::Test
   def test_scheme_and_authority_encode
     assert_equal "coap://foo.bar:4711", CoRE::CoAP.scheme_and_authority_encode("foo.bar", 4711)
     assert_equal "coap://foo.bar:4711", CoRE::CoAP.scheme_and_authority_encode("foo.bar", "4711")
-    assert_raise ArgumentError do
+    assert_raises ArgumentError do
       CoRE::CoAP.scheme_and_authority_encode("foo.bar", "baz")
     end
     assert_equal "coap://bar.baz", CoRE::CoAP.scheme_and_authority_encode("bar.baz", 5683)

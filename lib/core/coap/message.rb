@@ -75,9 +75,9 @@ module CoRE
       def to_s
         s  = mcode_readable
         s += ' '
-        s += Codification.path_encode(self.options[:uri_path])
+        s += CoAP.path_encode(self.options[:uri_path])
         s += ' '
-        s += Codification.query_encode(self.options[:uri_query])
+        s += CoAP.query_encode(self.options[:uri_query])
       end
 
       def to_wire
