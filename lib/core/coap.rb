@@ -23,6 +23,7 @@ require 'socket'
 require 'resolv-ipv6favor'
 require 'ipaddr'
 require 'timeout'
+require 'yaml'
 
 require_relative 'hexdump'
 
@@ -30,6 +31,7 @@ require_relative 'coap/utility'
 require_relative 'coap/codification'
 require_relative 'coap/types'
 require_relative 'coap/options'
+require_relative 'coap/registry'
 
 require_relative 'coap/coap'
 require_relative 'coap/message'
