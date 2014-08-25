@@ -61,14 +61,16 @@ describe CoRE::Link do
       expect { CoRE::Link.parse(text) }.not_to raise_error
     end
 
-    describe 'of multiple links' do
-      it 'should not fail' do
-        text = '<test>;if="test",<test>;if="test"'
-        links = CoRE::Link.parse_multiple(text)
+    it 'of multiple link should not fail' do
+      text = '<test>;if="test",<test>;if="test"'
+      links = CoRE::Link.parse_multiple(text)
 
-        expect(links).to be_a(Array)
-        expect(links.size).to eq(2)
-      end
+      expect(links).to be_a(Array)
+      expect(links.size).to eq(2)
+    end
+
+    it 'should work with coap.me' do
+      expect { CoRE::Link.parse(fixture('coap.me.link')) }.not_to raise_error
     end
   end
 end

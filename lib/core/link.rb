@@ -3,7 +3,7 @@ module CoRE
   # http://tools.ietf.org/html/rfc6690
   # TODO Handle repeated attributes
   class Link
-    VALID_ATTRS = %i[anchor hreflang if media obs rt rel rev sz title type]
+    VALID_ATTRS = %i[anchor ct hreflang if media obs rt rel rev sz title type]
     DEFAULT_ATTRS = {
       rel: 'hosts',
     }
