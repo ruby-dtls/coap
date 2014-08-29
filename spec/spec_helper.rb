@@ -1,6 +1,3 @@
-require 'coveralls'
-Coveralls.wear!
-
 require_relative '../lib/core'
 
 def fixture_path

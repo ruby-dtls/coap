@@ -8,4 +8,4 @@ notifications:
 
 script:
   - bundle exec rake build
-  - bundle exec rake test
+  - bundle exec rake test:coveralls
