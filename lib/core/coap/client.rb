@@ -15,25 +15,24 @@ module CoRE
       #                   default 5683).
       def initialize(options = {})
         @max_payload    = options[:max_payload]     || 256
-        @max_retransmit = options[:max_retransmit]  || 4
-        @ack_timeout    = options[:ack_timeout]     || 2
 
         @host = options[:host]
         @port = options[:port] || CoAP::PORT
 
-        @retry_count = 0
+        @options = options
 
-        set_socket(UDPSocket)
+#       @socket = MySocket.new(UDPSocket, @ack_timeout)
+#       @retry_count = 0
 
         @logger = CoAP.logger
       end
 
       # Enable DTLS socket.
-      def use_dtls
-        require 'CoDTLS'
-        set_socket(CoDTLS::SecureSocket)
-        self
-      end
+#     def use_dtls
+#       require 'CoDTLS'
+#       @socket = MySocket.new(CoDTLS::SecureSocket, @ack_timeout)
+#       self
+#     end
 
       def chunkify(string)
         chunks = []
@@ -44,16 +43,16 @@ module CoRE
 
       # GET
       #
+      # @param  path      Path
       # @param  host      Destination host
       # @param  port      Destination port
-      # @param  path      Path
       # @param  payload   Payload
       # @param  options   Options
       #
       # @return CoAP::Message
-      def get(host, port, path, payload = nil, options = {})
-        @retry_count = 0
-        client(host, port, path, :get, payload, options)
+      def get(*args)
+#       @retry_count = 0
+        client(:get, *args)
       end
 
       # GET by URI
@@ -63,8 +62,8 @@ module CoRE
       # @param  options   Options
       #
       # @return CoAP::Message
-      def get_by_uri(uri, payload = nil, options = {})
-        get(*decode_uri(uri), payload, options)
+      def get_by_uri(uri, *args)
+        get(*decode_uri(uri), *args)
       end
 
       # POST
@@ -76,9 +75,9 @@ module CoRE
       # @param  options   Options
       #
       # @return CoAP::Message
-      def post(host, port, path, payload = nil, options = {})
-        @retry_count = 0
-        client(host, port, path, :post, payload, options)
+      def post(*args)
+#       @retry_count = 0
+        client(:post, *args)
       end
 
       # POST by URI
@@ -88,8 +87,8 @@ module CoRE
       # @param  options   Options
       #
       # @return CoAP::Message
-      def post_by_uri(uri, payload = nil, options = {})
-        post(*decode_uri(uri), payload, options)
+      def post_by_uri(uri, *args)
+        post(*decode_uri(uri), *args)
       end
 
       # PUT
@@ -101,9 +100,9 @@ module CoRE
       # @param  options   Options
       #
       # @return CoAP::Message
-      def put(host, port, path, payload = nil, options = {})
-        @retry_count = 0
-        client(host, port, path, :put, payload, options)
+      def put(*args)
+#       @retry_count = 0
+        client(:put, *args)
       end
 
       # PUT by URI
@@ -113,8 +112,8 @@ module CoRE
       # @param  options   Options
       #
       # @return CoAP::Message
-      def put_by_uri(uri, payload = nil, options = {})
-        put(*decode_uri(uri), payload, options)
+      def put_by_uri(uri, *args)
+        put(*decode_uri(uri), *args)
       end
 
       # DELETE
@@ -126,9 +125,9 @@ module CoRE
       # @param  options   Options
       #
       # @return CoAP::Message
-      def delete(host, port, path, payload = nil, options = {})
-        @retry_count = 0
-        client(host, port, path, :delete, payload, options)
+      def delete(*args)
+#       @retry_count = 0
+        client(:delete, *args)
       end
 
       # DELETE by URI
@@ -138,8 +137,8 @@ module CoRE
       # @param  options   Options
       #
       # @return CoAP::Message
-      def delete_by_uri(uri, payload = nil, options = {})
-        delete(*decode_uri(uri), payload, options)
+      def delete_by_uri(uri, *args)
+        delete(*decode_uri(uri), *args)
       end
 
       # OBSERVE
@@ -153,9 +152,9 @@ module CoRE
       # @param  options   Options
       #
       # @return CoAP::Message
-      def observe(host, port, path, callback, payload = nil, options = {})
+      def observe(path, host, port, callback, payload = nil, options = {})
         options[:observe] = 0
-        client(host, port, path, :get, payload, options, callback)
+        client(:get, path, host, port, payload, options, callback)
       end
 
       # OBSERVE by URI
@@ -167,13 +166,13 @@ module CoRE
       # @param  options   Options
       #
       # @return CoAP::Message
-      def observe_by_uri(uri, callback, payload = nil, options = {})
-        observe(*decode_uri(uri), callback, payload, options)
+      def observe_by_uri(uri, *args)
+        observe(*decode_uri(uri), *args)
       end
 
       private
 
-      def client(host, port, path, method, payload, options, observe_callback = nil)
+      def client(method, path, host = nil, port = nil, payload = nil, options = {}, observe_callback = nil)
         # Set host and port only one time on multiple requests
         host.nil? ? (host = @host unless @host.nil?) : @host = host
         port.nil? ? (port = @port unless @port.nil?) : @port = port
@@ -225,49 +224,37 @@ module CoRE
 
         log_message(:sending_message, message)
 
-        # Connect via UDP/DTLS.
-        @socket.connect host, port
-
-        # Wait for answer and retry sending message if timeout rached.
-        begin
-          @socket.send message.to_wire
-          recv_data = @socket.receive
-        rescue Timeout::Error
-          @retry_count += 1
-
-          if @retry_count > @max_retransmit
-            raise "Maximum retransmission count reached (#{@max_retransmit})."
-          end
-
-          retry
-        end
-
-        # Parse received data.
-        recv_parsed = CoAP.parse(recv_data[0].force_encoding('BINARY'))
+        # Wait for answer and retry sending message if timeout reached.
+        @ether, recv_parsed = Ether.send_and_receive(message, host, port, @options)
 
         log_message(:received_message, recv_parsed)
+
+        # Token of received message mismatches.
+        if recv_parsed.options[:token] != message.options[:token]
+          fail ArgumentError, 'Received message with wrong token.'
+        end
 
         # Payload is not fully transmitted.
         # TODO Get rid of nasty recursion.
         if block1[:more]
-          fail 'Max Recursion' if @retry_count > 10
-          return client(host, port, path, method, payload, message.options)
+#         fail 'Max Recursion' if @retry_count > 10
+          return client(method, path, host, port, payload, message.options)
         end
 
         # Separated?
-        if recv_parsed.tt == :ack && recv_parsed.payload.empty? && recv_parsed.mid == message.mid && recv_parsed.mcode[0] == 0 && recv_parsed.mcode[1] == 0
+        if recv_parsed.tt == :ack && recv_parsed.payload.empty? && recv_parsed.mid == message.mid && recv_parsed.mcode == [0, 0]
           @logger.debug '### SEPARATE REQUEST ###'
 
           # Wait for answer...
-          recv_data = @socket.receive(600, @retry_count)
-          recv_parsed = CoAP.parse(recv_data[0].force_encoding('BINARY'))
+#         recv_parsed = @ether.receive(@retry_count)
+          recv_parsed = @ether.receive
 
           log_message(:seperated_data, recv_parsed)
 
           if recv_parsed.tt == :con
             message = Message.new(:ack, 0, recv_parsed.mid, nil, {})
             message.options = { token: recv_parsed.options[:token] }
-            @socket.send message.to_wire, 0
+            @ether.send(message, host, port)
           end
 
           @logger.debug '### SEPARATE REQUEST END ###'
@@ -282,24 +269,19 @@ module CoRE
           options.delete(:block1) # end block1
           options[:block2] = Block.encode_hash(block2)
 
-          fail 'Max Recursion' if @retry_count > 50
+#         fail 'Max Recursion' if @retry_count > 50
 
-          local_recv_parsed = client(host, port, path, method, nil, options)
+          local_recv_parsed = client(method, path, host, port, nil, options)
 
           unless local_recv_parsed.nil?
             recv_parsed.payload << local_recv_parsed.payload
           end
         end
 
-        # Token of received message mismatches.
-        if recv_parsed.options[:token] != message.options[:token]
-          fail ArgumentError, 'Received message with wrong token.'
-        end
-
         # Do we need to observe?
         if recv_parsed.options[:observe]
           @Observer = CoAP::Observer.new
-          @Observer.observe(recv_parsed, recv_data, observe_callback, @socket)
+          @Observer.observe(recv_parsed, recv_data, observe_callback, @ether)
         end
 
         recv_parsed
@@ -339,12 +321,6 @@ module CoRE
         @logger.debug '###' + text.to_s.upcase.gsub('_', ' ')
         @logger.debug message.inspect
         @logger.debug message.to_s.hexdump if $DEBUG
-      end
-
-      def set_socket(socket_class)
-        @socket = MySocket.new
-        @socket.socket_type = socket_class
-        @socket.ack_timeout = @ack_timeout
       end
 
       # Raise ArgumentError exceptions on wrong client method arguments.

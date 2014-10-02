@@ -71,10 +71,10 @@ class TestMessage < Minitest::Test
   end
 
   def test_scheme_and_authority_decode
-    assert_equal ["foo.bar", 4711, nil], CoRE::CoAP.scheme_and_authority_decode("coap://foo.bar:4711")
-    assert_equal ["foo.bar", 5683, nil], CoRE::CoAP.scheme_and_authority_decode("coap://foo.bar")
-    assert_equal ["foo:bar", 4711, nil], CoRE::CoAP.scheme_and_authority_decode("coap://[foo:bar]:4711")
-    assert_equal ["foo:bar", 5683, nil], CoRE::CoAP.scheme_and_authority_decode("coap://%5Bfoo:bar%5D")
+    assert_equal [nil, "foo.bar", 4711], CoRE::CoAP.scheme_and_authority_decode("coap://foo.bar:4711")
+    assert_equal [nil, "foo.bar", 5683], CoRE::CoAP.scheme_and_authority_decode("coap://foo.bar")
+    assert_equal [nil, "foo:bar", 4711], CoRE::CoAP.scheme_and_authority_decode("coap://[foo:bar]:4711")
+    assert_equal [nil, "foo:bar", 5683], CoRE::CoAP.scheme_and_authority_decode("coap://%5Bfoo:bar%5D")
   end
 
   def test_coap_message

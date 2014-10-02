@@ -91,7 +91,7 @@ module CoRE
         if s =~ %r{\A(?:coap://)((?:\[|%5B)([^\]]*)(?:\]|%5D)|([^:/]*))(:(\d+))?(/.*)?\z}i
           host = $2 || $3       # Should check syntax...
           port = $5 || CoAP::PORT
-          [host, port.to_i, $6]
+          [$6, host, port.to_i]
         end
       end
 
