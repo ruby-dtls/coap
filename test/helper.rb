@@ -1,6 +1,5 @@
 require 'minitest/autorun'
 require 'logger'
-require 'faker'
 
 require 'core.rb'
 

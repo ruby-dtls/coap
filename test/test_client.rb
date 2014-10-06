@@ -4,16 +4,7 @@ require_relative 'helper'
 
 # TODO Rewrite tests with local coap server!
 
-PAYLOAD = Faker::Lorem.paragraphs(5).join("\n")
-PAYLOAD_UTF8 = '♥' + PAYLOAD
-
 class TestClient < Minitest::Test
-  @@observe_count = 0
-
-  def observe_tester(data, socket)
-    @@observe_count += 1
-  end
-
   def test_client_get_v4_v6_hostname
     # client = CoRE::CoAP::Client.new
     # answer = client.get('/hello', '2001:638:708:30da:219:d1ff:fea4:abc5')
@@ -179,57 +170,6 @@ class TestClient < Minitest::Test
     answer = client.get('/large')
     assert_equal([2, 5], answer.mcode)
     assert_equal(%Q'\n     0                   1                   2                   3\n    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1\n   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n   |Ver| T |  TKL  |      Code     |          Message ID           |\n   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n   |   Token (if any, TKL bytes) ...\n   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n   |   Options (if any) ...\n   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n   |1 1 1 1 1 1 1 1|    Payload (if any) ...\n   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n\n[...]\n\n   Token Length (TKL):  4-bit unsigned integer.  Indicates the length of\n      the variable-length Token field (0-8 bytes).  Lengths 9-15 are\n      reserved, MUST NOT be sent, and MUST be processed as a message\n      format error.\n\n   Code:  8-bit unsigned integer, split into a 3-bit class (most\n      significant bits) and a 5-bit detail (least significant bits),\n      documented as c.dd where c is a digit from 0 to 7 for the 3-bit\n      subfield and dd are two digits from 00 to 31 for the 5-bit\n      subfield.  The class can indicate a request (0), a success\n      response (2), a client error response (4), or a server error\n      response (5).  (All other class values are reserved.)  As a\n      special case, Code 0.00 indicates an Empty message.  In case of a\n      request, the Code field indicates the Request Method; in case of a\n      response a Response Code.  Possible values are maintained in the\n      CoAP Code Registries (Section 12.1).  The semantics of requests\n      and responses are defined in Section 5.\n\n', answer.payload)
-  end
-
-  def test_client_separate
-    client = CoRE::CoAP::Client.new
-    answer = client.get('/seperate', 'coap.me')
-    assert_equal([2, 5], answer.mcode)
-    assert_equal('That took a long time', answer.payload)
-  end
-
-  def test_client_observe
-    client = CoRE::CoAP::Client.new
-
-    t1 = Thread.new do
-      client.observe('/obs', 'vs0.inf.ethz.ch', nil, method(:observe_tester))
-    end
-
-    old_value = @@observe_count
-    Timeout::timeout(3) do
-      sleep 0.25 while old_value == @@observe_count
-    end
-
-    assert_operator @@observe_count, :>, old_value
-  end
-
-  def test_client_block1
-    client = CoRE::CoAP::Client.new(max_payload: 512)
-    answer = client.post('/large-create', 'coap.me', nil, PAYLOAD)
-    assert_equal([2, 1], answer.mcode)
-
-    client = CoRE::CoAP::Client.new(max_payload: 512)
-    answer = client.get('/large-create', 'coap.me')
-    assert_equal([2, 5], answer.mcode)
-    assert_equal(PAYLOAD, answer.payload)
-
-    client = CoRE::CoAP::Client.new(max_payload: 512)
-    answer = client.post('/large-create', 'coap.me', nil, PAYLOAD_UTF8)
-    assert_equal([2, 1], answer.mcode)
-
-    client = CoRE::CoAP::Client.new(max_payload: 512)
-    answer = client.get('/large-create', 'coap.me')
-    assert_equal([2, 5], answer.mcode)
-    assert_equal(PAYLOAD_UTF8, answer.payload.force_encoding('utf-8'))
-
-    client = CoRE::CoAP::Client.new(max_payload: 512)
-    answer = client.put('/large-update', 'coap.me', nil, PAYLOAD)
-    assert_equal([2, 4], answer.mcode)
-
-    client = CoRE::CoAP::Client.new(max_payload: 512)
-    answer = client.get('/large-update', 'coap.me')
-    assert_equal([2, 5], answer.mcode)
-    assert_equal(PAYLOAD, answer.payload)
   end
 
   def test_client_block2

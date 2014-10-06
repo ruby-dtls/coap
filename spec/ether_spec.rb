@@ -40,6 +40,8 @@ describe CoRE::CoAP::Ether do
       expect { CoRE::CoAP::Ether.send('hello', '127.0.0.1') }.not_to raise_error
       expect { CoRE::CoAP::Ether.send('hello', '::1') }.not_to raise_error
       expect { CoRE::CoAP::Ether.send('hello', 'ipv4.orgizm.net') }.not_to raise_error
+      expect { CoRE::CoAP::Ether.send('hello', 'orgizm.net') }.not_to raise_error
+      expect { CoRE::CoAP::Ether.send('hello', '.') }.to raise_error(Resolv::ResolvError)
     end
   end
 end

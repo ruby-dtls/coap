@@ -280,8 +280,8 @@ module CoRE
 
         # Do we need to observe?
         if recv_parsed.options[:observe]
-          @Observer = CoAP::Observer.new
-          @Observer.observe(recv_parsed, recv_data, observe_callback, @ether)
+          @observer = CoAP::Observer.new
+          @observer.observe(recv_parsed, nil, observe_callback, @ether)
         end
 
         recv_parsed
