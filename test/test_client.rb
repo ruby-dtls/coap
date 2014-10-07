@@ -36,16 +36,16 @@ class TestClient < Minitest::Test
     end
   end
 
-  def test_ack_timeout
-    client = CoRE::CoAP::Client.new(max_retransmit: 0, ack_timeout: 0.1)
+  def test_recv_timeout
+    client = CoRE::CoAP::Client.new(max_retransmit: 0, recv_timeout: 0.1)
 
     assert_raises RuntimeError do
       client.get('/hello', '192.0.2.1')
     end
   end
 
-  def test_ack_timeout_retransmit
-    client = CoRE::CoAP::Client.new(max_retransmit: 1, ack_timeout: 1)
+  def test_recv_timeout_retransmit
+    client = CoRE::CoAP::Client.new(max_retransmit: 1, recv_timeout: 1)
 
     assert_raises RuntimeError do
       client.get('/hello', 'eternium.orgizm.net', 1195)

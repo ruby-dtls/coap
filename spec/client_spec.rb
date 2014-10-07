@@ -62,23 +62,23 @@ describe CoRE::CoAP::Client do
     end
   end
 
-  describe '#observe1' do
+  describe '#observe' do
     before do
       @answers = []
 
       @t1 = Thread.start do
         @client.observe \
           '/obs', 'vs0.inf.ethz.ch', nil,
-          ->(m, d) { @answers << m }
+          ->(m) { @answers << m }
+      end
+
+      Timeout.timeout(12) do
+        sleep 0.25 while !(@answers.size > 2)
       end
     end
 
     it 'should receive updates' do
-      Timeout.timeout(3) do
-        sleep 0.25 while !(@answers.size > 1)
-      end
-
-      expect(@answers.size).to be > 1
+      expect(@answers.size).to be > 2
     end
 
     after do

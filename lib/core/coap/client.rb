@@ -4,13 +4,13 @@ module CoRE
   module CoAP
     # CoAP client library
     class Client
-      attr_accessor :max_payload, :max_retransmit, :ack_timeout, :host, :port,
+      attr_accessor :max_payload, :max_retransmit, :recv_timeout, :host, :port,
         :socket
 
       # @param  options   Valid options are (all optional): max_payload
       #                   (maximum payload size, default 256), max_retransmit
       #                   (maximum retransmission count, default 4),
-      #                   ack_timeout (timeout for ACK responses, default: 2),
+      #                   recv_timeout (timeout for ACK responses, default: 2),
       #                   host (destination host), post (destination port,
       #                   default 5683).
       def initialize(options = {})
@@ -21,7 +21,7 @@ module CoRE
 
         @options = options
 
-#       @socket = MySocket.new(UDPSocket, @ack_timeout)
+#       @socket = MySocket.new(UDPSocket, @recv_timeout)
 #       @retry_count = 0
 
         @logger = CoAP.logger
@@ -30,7 +30,7 @@ module CoRE
       # Enable DTLS socket.
 #     def use_dtls
 #       require 'CoDTLS'
-#       @socket = MySocket.new(CoDTLS::SecureSocket, @ack_timeout)
+#       @socket = MySocket.new(CoDTLS::SecureSocket, @recv_timeout)
 #       self
 #     end
 
@@ -251,12 +251,6 @@ module CoRE
 
           log_message(:seperated_data, recv_parsed)
 
-          if recv_parsed.tt == :con
-            message = Message.new(:ack, 0, recv_parsed.mid, nil, {})
-            message.options = { token: recv_parsed.options[:token] }
-            @ether.send(message, host, port)
-          end
-
           @logger.debug '### SEPARATE REQUEST END ###'
         end
 
@@ -280,8 +274,7 @@ module CoRE
 
         # Do we need to observe?
         if recv_parsed.options[:observe]
-          @observer = CoAP::Observer.new
-          @observer.observe(recv_parsed, nil, observe_callback, @ether)
+          CoAP::Observer.new.observe(recv_parsed, observe_callback, @ether)
         end
 
         recv_parsed

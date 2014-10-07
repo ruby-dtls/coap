@@ -2,26 +2,38 @@ module CoRE
   module CoAP
     # Socket abstraction.
     class Ether
-      attr_accessor :max_retransmit, :ack_timeout
+      DEFAULT_RECV_TIMEOUT = 2
+
+      attr_accessor :max_retransmit, :recv_timeout
       attr_reader :address_family, :socket
 
       def initialize(options = {})
         @socket_class   = options[:socket_class]   || Celluloid::IO::UDPSocket
         @address_family = options[:address_family] || Socket::AF_INET6
-        @ack_timeout    = options[:ack_timeout]    || 2
+        @recv_timeout   = options[:recv_timeout]   || DEFAULT_RECV_TIMEOUT
         @max_retransmit = options[:max_retransmit] || 4
 
         @socket = @socket_class.new(@address_family)
       end
 
-      def receive(retry_count = 0)
-        timeout = @ack_timeout ** (retry_count.to_i + 1)
+      def receive(options = {})
+        retry_count = options[:retry_count] || 0
+        timeout = (options[:timeout] || @recv_timeout) ** (retry_count + 1)
 
         data = Timeout.timeout(timeout) do
           @socket.recvfrom(1024)
         end
 
-        CoAP.parse(data[0].force_encoding('BINARY'))
+        answer = CoAP.parse(data[0].force_encoding('BINARY'))
+
+        if answer.tt == :con
+          message = Message.new(:ack, 0, answer.mid, nil,
+            {token: answer.options[:token]})
+
+          send(message, data[1][3])
+        end
+
+        answer
       end
 
       def send(message, host, port = CoAP::PORT)
@@ -34,7 +46,7 @@ module CoRE
 
         begin
           send(message, host, port)
-          receive(retry_count)
+          receive(retry_count: retry_count)
         rescue Timeout::Error
           retry_count += 1
 

@@ -5,40 +5,28 @@ module CoRE
 
       def initialize
         @logger = CoAP.logger
-
-        @retry_count = 0
       end
 
-      def observe(recv_parsed, recv_data, observe_callback, socket)
-        observe_number = recv_parsed.options[:observe]
-        observe_callback.call(recv_parsed, recv_data)
+      def observe(message, callback, socket)
+        n = message.options[:observe]
 
+        callback.call(message)
+
+        # This does not seem to be able to cope with concurrency.
         loop do
-          begin # TODO fix this
-            recv_data = socket.receive(60, @retry_count)
-          rescue Timeout::Error
-            @retry_count = 0
-            @logger.error 'Observe Timeout'
-          end
+          answer = socket.receive(timeout: 0)
 
-          recv_parsed = CoAP.parse(recv_data[0].force_encoding('BINARY'))
+          next unless answer.options[:observe]
 
-          if recv_parsed.tt == :con
-            message = Message.new(:ack, 0, recv_parsed.mid, nil, {})
-            socket.send message.to_wire, 0
-          end
-
-          next unless recv_parsed.options[:observe]
-
-          if observe_update?(observe_number, recv_parsed.options[:observe])
-            observe_callback.call(recv_parsed, recv_data)
+          if update?(n, answer.options[:observe])
+            callback.call(answer)
           end
         end
       end
 
       private
 
-      def observe_update?(old, new)
+      def update?(old, new)
         if new > old
           new - old < MAX_OBSERVE_OPTION_VALUE
         elsif new < old
