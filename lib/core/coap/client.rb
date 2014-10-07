@@ -225,33 +225,15 @@ module CoRE
         log_message(:sending_message, message)
 
         # Wait for answer and retry sending message if timeout reached.
-        @ether, recv_parsed = Ether.send_and_receive(message, host, port, @options)
+        @ether, recv_parsed = Ether.request(message, host, port, @options)
 
         log_message(:received_message, recv_parsed)
-
-        # Token of received message mismatches.
-        if recv_parsed.options[:token] != message.options[:token]
-          fail ArgumentError, 'Received message with wrong token.'
-        end
 
         # Payload is not fully transmitted.
         # TODO Get rid of nasty recursion.
         if block1[:more]
 #         fail 'Max Recursion' if @retry_count > 10
           return client(method, path, host, port, payload, message.options)
-        end
-
-        # Separated?
-        if recv_parsed.tt == :ack && recv_parsed.payload.empty? && recv_parsed.mid == message.mid && recv_parsed.mcode == [0, 0]
-          @logger.debug '### SEPARATE REQUEST ###'
-
-          # Wait for answer...
-#         recv_parsed = @ether.receive(@retry_count)
-          recv_parsed = @ether.receive
-
-          log_message(:seperated_data, recv_parsed)
-
-          @logger.debug '### SEPARATE REQUEST END ###'
         end
 
         # Test for more block2 payload.
@@ -311,7 +293,7 @@ module CoRE
 
       # Log message to debug log.
       def log_message(text, message)
-        @logger.debug '###' + text.to_s.upcase.gsub('_', ' ')
+        @logger.debug '### ' + text.to_s.upcase.gsub('_', ' ')
         @logger.debug message.inspect
         @logger.debug message.to_s.hexdump if $DEBUG
       end

@@ -8,7 +8,7 @@ describe CoRE::CoAP::Client do
   describe '#get' do
     describe 'with seperated answer' do
       it 'should return correct mcode and payload' do
-        answer = @client.get('/seperate', 'coap.me')
+        answer = @client.get('/separate', 'coap.me')
         expect(answer.mcode).to eq([2, 5])
         expect(answer.payload).to eq('That took a long time')
       end

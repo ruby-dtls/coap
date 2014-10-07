@@ -41,12 +41,12 @@ module CoRE
         @socket.send(message, Socket::MSG_DONTWAIT, host, port)
       end
 
-      def send_and_receive(message, host, port = CoAP::PORT)
+      def request(message, host, port = CoAP::PORT)
         retry_count = 0
 
         begin
           send(message, host, port)
-          receive(retry_count: retry_count)
+          response = receive(retry_count: retry_count)
         rescue Timeout::Error
           retry_count += 1
 
@@ -56,6 +56,26 @@ module CoRE
 
           retry
         end
+
+        if message.mid != response.mid
+          raise 'Wrong message id.'
+        end
+
+        response = receive(timeout: 10) if seperate?(response)
+
+        # Check if response token mismatches.
+        if message.options[:token] != response.options[:token]
+          raise 'Received message with wrong token.'
+        end
+
+        response
+      end
+
+      private
+
+      def seperate?(response)
+        r = response
+        r.tt == :ack && r.payload.empty? && r.mcode == [0, 0]
       end
 
       class << self
@@ -74,8 +94,8 @@ module CoRE
           invoke(:send, *args)
         end
 
-        def send_and_receive(*args)
-          invoke(:send_and_receive, *args)
+        def request(*args)
+          invoke(:request, *args)
         end
 
         private
