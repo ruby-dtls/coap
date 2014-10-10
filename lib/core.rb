@@ -1,7 +1,8 @@
+$:.unshift File.expand_path(File.dirname(__FILE__))
+
 module CoRE
 end
 
-require_relative 'core/link'
-
-require_relative 'core/coap'
-require_relative 'core/hexdump'
+require 'core/link'
+require 'core/coap'
+require 'core/hexdump'

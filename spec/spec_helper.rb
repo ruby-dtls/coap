@@ -1,7 +1,8 @@
 require 'coveralls'
 Coveralls.wear_merged!
 
-require_relative '../lib/core'
+#$:.unshift File.expand_path('../lib', File.dirname(__FILE__))
+require 'core'
 
 require 'faker'
 

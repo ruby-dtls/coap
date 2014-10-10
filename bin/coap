@@ -4,7 +4,8 @@ require 'getoptlong'
 require 'pp'
 require 'uri'
 
-require_relative '../lib/coap'
+$:.unshift File.expand_path('../lib', File.dirname(__FILE__))
+require 'coap'
 
 def observe_callback(data, socket)
   if $DEBUG

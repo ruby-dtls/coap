@@ -1,9 +1,15 @@
+# encoding: utf-8
+
 module CoRE
   # Implements CoRE Link Format (RFC6690)
   # http://tools.ietf.org/html/rfc6690
   # TODO Handle repeated attributes
   class Link
-    VALID_ATTRS = %i[anchor ct hreflang if media obs rt rel rev sz title type]
+    VALID_ATTRS = [
+      :anchor, :ct, :hreflang, :if, :media, :obs, :rt, :rel, :rev, :sz, :title,
+      :type
+    ]
+
     DEFAULT_ATTRS = {
       rel: 'hosts',
     }
@@ -85,7 +91,7 @@ module CoRE
       end
       
       if attrs[:rel].nil?
-        raise ArgumentError.new('Attribute «rel» unset.')
+        raise ArgumentError.new("Attribute «rel» unset.")
       end
     end
   end

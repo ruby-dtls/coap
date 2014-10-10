@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require_relative 'helper'
+require 'helper'
 
 class TestMessage < Minitest::Test
   def test_number_of_bits_up_to

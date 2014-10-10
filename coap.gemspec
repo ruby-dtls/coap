@@ -1,4 +1,5 @@
-require_relative 'lib/core/coap/version'
+$:.unshift File.expand_path('lib', File.dirname(__FILE__))
+require 'core/coap/version'
 
 Gem::Specification.new do |s|
   s.name = 'coap'

@@ -4,7 +4,8 @@ Coveralls.wear_merged!
 require 'minitest/autorun'
 require 'logger'
 
-require 'core.rb'
+$:.unshift File.expand_path('../lib', File.dirname(__FILE__))
+require 'core'
 
 d = ENV['DEBUG']
 Log = Logger.new(d && IO.new(d.to_i))

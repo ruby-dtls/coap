@@ -38,7 +38,10 @@ module CoRE
 
       def send(message, host, port = CoAP::PORT)
         message = message.to_wire if message.respond_to?(:to_wire)
-        @socket.send(message, Socket::MSG_DONTWAIT, host, port)
+        # In MRI and Rubinius, the Socket::MSG_DONTWAIT option is 64.
+        # It is not defined by JRuby.
+        # TODO Is it really necessary?
+        @socket.send(message, 64, host, port)
       end
 
       def request(message, host, port = CoAP::PORT)
@@ -85,7 +88,8 @@ module CoRE
           else
             new(options.merge(address_family: Socket::AF_INET))
           end
-        rescue IPAddr::InvalidAddressError
+        # MRI throws IPAddr::InvalidAddressError, JRuby an ArgumentError
+        rescue StandardError
           host = Resolver.address(host)
           retry
         end

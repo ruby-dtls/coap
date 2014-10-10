@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require_relative 'helper'
+require 'helper'
 
 # TODO Rewrite tests with local coap server!
 
