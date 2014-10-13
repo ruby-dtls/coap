@@ -34,11 +34,8 @@ module CoRE
 #       self
 #     end
 
-      def chunkify(string)
-        chunks = []
-        size = 2**((Math.log2(@max_payload).floor - 4) + 4)
-        string.bytes.each_slice(size) { |s| chunks << s.pack('C*') }
-        chunks
+      def chunkify(string, size)
+        string.bytes.each_slice(size).map { |c| c.pack('C*') }
       end
 
       # GET
@@ -192,7 +189,11 @@ module CoRE
         end
 
         # Initialize chunks if payload size > max_payload.
-        chunks = chunkify(payload) unless payload.nil?
+        if !payload.nil? && payload.bytes.size > @max_payload
+          chunks = chunkify(payload, @max_payload)
+        else
+          chunks = [payload]
+        end
 
         # Create CoAP message struct.
         message = initialize_message(method, host, port, path, payload, block2)
