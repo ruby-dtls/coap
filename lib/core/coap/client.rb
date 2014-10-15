@@ -274,8 +274,8 @@ module CoRE
       end
 
       def initialize_message(method, host, port, path, payload = nil, block2 = nil)
-        mid   = SecureRandom.random_number(999)
-        token = SecureRandom.random_number(256)
+        mid   = SecureRandom.random_number(0xffff)
+        token = SecureRandom.random_number(0xff)
 
         options = {
           uri_path: CoAP.path_decode(path),
