@@ -189,7 +189,7 @@ module CoRE
         end
 
         # Initialize chunks if payload size > max_payload.
-        if !payload.nil? && payload.bytes.size > @max_payload
+        if !payload.nil? && payload.bytesize > @max_payload
           chunks = chunkify(payload, @max_payload)
         else
           chunks = [payload]
