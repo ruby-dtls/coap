@@ -8,12 +8,21 @@ module CoRE
       attr_reader :address_family, :socket
 
       def initialize(options = {})
-        @socket_class   = options[:socket_class]   || Celluloid::IO::UDPSocket
-        @address_family = options[:address_family] || Socket::AF_INET6
-        @recv_timeout   = options[:recv_timeout]   || DEFAULT_RECV_TIMEOUT
-        @max_retransmit = options[:max_retransmit] || 4
+        @recv_timeout     = options[:recv_timeout]   || DEFAULT_RECV_TIMEOUT
+        @max_retransmit   = options[:max_retransmit] || 4
 
-        @socket = @socket_class.new(@address_family)
+        @socket           = options[:socket]
+
+        if @socket
+          @socket_class   = @socket.class
+          @address_family = @socket.addr.first
+        else
+          @socket_class   = options[:socket_class]   || Celluloid::IO::UDPSocket
+          @address_family = options[:address_family] || Socket::AF_INET6
+          @socket         = @socket_class.new(@address_family)
+        end
+
+        @socket
       end
 
       def receive(options = {})
@@ -108,7 +117,11 @@ module CoRE
           options = {}
           options = args.pop if args.last.is_a? Hash
 
-          ether = from_host(args[1], options)
+          if options[:socket]
+            ether = Ether.new(socket: options[:socket])
+          else
+            ether = from_host(args[1], options)
+          end
 
           [ether, ether.__send__(method, *args)]
         end
