@@ -115,7 +115,7 @@ module CoRE
           end
         end
 
-        if payload != ''
+        if payload != '' && !payload.nil?
           result << 0xFF
           result << payload.dup.force_encoding(CoAP::BIN)
         end

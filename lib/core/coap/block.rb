@@ -1,47 +1,93 @@
 module CoRE
   module CoAP
-    # CoAP client library
     class Block
-       def self.initialize(num, more, szx)
-         @logger = CoAP.logger
+      VALID_SIZE = [16, 32, 64, 128, 256, 512, 1024].freeze
+      MAX_NUM = (1048576 - 1).freeze
 
-         { more: more, szx: szx, num: num }
-       end
+      attr_reader :num, :more, :size
 
-       def self.encode(num, more, szx)
-         block = szx | more << 3 | num << 4
+      def initialize(*args)
+        if args.size == 1
+          @encoded = args.first.to_i
+        else
+          @decoded = []
+          self.num, self.more, self.size = args
+          @decoded = [self.num, self.more, self.size]
+        end
 
-         @logger.debug '### CoAP Block encode ###'
-         @logger.debug block
-         @logger.debug '### CoAP Block encode ###'
+        self
+      end
 
-         block
-       end
+      def chunk(data)
+        data[@size * @num, @size]
+      end
 
-       def self.encode_hash(blockHash)
-         blockHash[:more] ? more = 1 : more = 0
-         block = blockHash[:szx] | more << 3 | blockHash[:num] << 4
+      def chunk_count(data)
+        i = data.size % self.size == 0 ? 0 : 1
+        data.size / self.size + i
+      end
 
-         @logger.debug '### CoAP Block encode ###'
-         @logger.debug block
-         @logger.debug '### CoAP Block encode ###'
+      def chunkify(data)
+        Block.chunkify(data, self.size)
+      end
 
-         block
-       end
+      def decode
+        if @encoded == 0
+          @decoded = [0, false, 16]
+        else
+          @decoded = [@encoded >> 4, (@encoded & 8) == 8, 16 << (@encoded & 7)]
+        end
 
-       def self.decode(blockOption)
-         more = blockOption != nil && (blockOption & 8) === 8
-         szx = blockOption != nil ? blockOption & 7 : 0
-         num = blockOption != nil ? blockOption >> 4 : 0
+        self.num, self.more, self.size = @decoded
 
-         @logger.debug '### CoAP Block decode ###'
-         @logger.debug 'm: ' + more.to_s
-         @logger.debug 'szx: ' + szx.to_s
-         @logger.debug 'num: ' + num.to_s
-         @logger.debug '### CoAP Block decode ###'
+        self
+      end
 
-         { more: more, szx: szx, num: num }
-       end
+      def encode
+        @encoded = @num << 4 | (@more ? 1 : 0) << 3 | Block.log2(@size) - 4
+      end
+
+      def last?(data)
+        self.num == chunk_count(data) - 1
+      end
+
+      def more=(v)
+        if @num > MAX_NUM
+          raise ArgumentError, 'num MUST be < 1048576'
+        end
+
+        @more = !!v
+        @decoded[1] = @more
+      end
+
+      def num=(v)
+        @num = v.to_i
+        @decoded[0] = @num
+      end
+
+      def size=(v)
+        unless VALID_SIZE.include?(v.to_i)
+          raise ArgumentError, 'size MUST be power of 2 between 16 and 1024.'
+        end
+
+        @size = v.to_i
+        @decoded[2] = @size
+      end
+
+      def self.chunkify(data, size)
+        data.bytes.each_slice(size).map { |c| c.pack('C*') }
+      end
+
+      def self.log2(x)
+        y = 0
+
+        while x != 1
+          x = x >> 1
+          y += 1
+        end
+
+        y
+      end
     end
   end
 end

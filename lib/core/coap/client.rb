@@ -34,10 +34,6 @@ module CoRE
 #       self
 #     end
 
-      def chunkify(string, size)
-        string.bytes.each_slice(size).map { |c| c.pack('C*') }
-      end
-
       # GET
       #
       # @param  path      Path
@@ -176,21 +172,21 @@ module CoRE
 
         validate_arguments!(host, port, path, payload)
 
-        szx = Math.log2(@max_payload).floor - 4
+        szx = 2 ** Block.log2(@max_payload)
 
-        # initialize block 2 with payload size
-        block2 = Block.initialize(0, false, szx) 
+        # Initialize block2 with payload size.
+        block2 = Block.new(0, false, szx)
 
-        # Initialize block1 if set.
+        # Initialize block1.
         block1 = if options[:block1].nil?
-          Block.initialize(0, false, szx)
+          Block.new(0, false, szx)
         else
-          Block.decode(options[:block1])
+          Block.new(options[:block1]).decode
         end
 
         # Initialize chunks if payload size > max_payload.
         if !payload.nil? && payload.bytesize > @max_payload
-          chunks = chunkify(payload, @max_payload)
+          chunks = Block.chunkify(payload, @max_payload)
         else
           chunks = [payload]
         end
@@ -201,21 +197,21 @@ module CoRE
         # If more than 1 chunk, we need to use block1.
         if !payload.nil? && chunks.size > 1
           # Increase block number.
-          block1[:num] += 1 unless options[:block1].nil?
+          block1.num += 1 unless options[:block1].nil?
 
           # More chunks?
-          if chunks.size > block1[:num] + 1
-            block1[:more] = true
+          if chunks.size > block1.num + 1
+            block1.more = true
             message.options.delete(:block2)
           else
-            block1[:more] = false
+            block1.more = false
           end
 
           # Set final payload.
-          message.payload = chunks[block1[:num]]
+          message.payload = chunks[block1.num]
 
           # Set block1 message option.
-          message.options[:block1] = Block.encode_hash(block1)
+          message.options[:block1] = block1.encode
         end
 
         # Preserve user options.
@@ -232,19 +228,19 @@ module CoRE
 
         # Payload is not fully transmitted.
         # TODO Get rid of nasty recursion.
-        if block1[:more]
+        if block1.more
 #         fail 'Max Recursion' if @retry_count > 10
           return client(method, path, host, port, payload, message.options)
         end
 
         # Test for more block2 payload.
-        block2 = Block.decode(recv_parsed.options[:block2])
+        block2 = Block.new(recv_parsed.options[:block2]).decode
 
-        if block2[:more]
-          block2[:num] += 1
+        if block2.more
+          block2.num += 1
 
           options.delete(:block1) # end block1
-          options[:block2] = Block.encode_hash(block2)
+          options[:block2] = block2.encode
 
 #         fail 'Max Recursion' if @retry_count > 50
 
@@ -282,14 +278,7 @@ module CoRE
           token: token
         }
 
-        message = Message.new(:con, method, mid, payload, options)
-
-        # Temporary fix to disable early negotiation.
-        if !block2.nil? && @may_payload != 256
-          message.options[:block2] = Block.encode_hash(block2)
-        end
-
-        message
+        Message.new(:con, method, mid, payload, options)
       end
 
       # Log message to debug log.
