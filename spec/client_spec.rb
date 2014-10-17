@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe CoRE::CoAP::Client do
+describe Client do
   before do
-    @client = CoRE::CoAP::Client.new
+    @client = Client.new
   end
 
   describe '#get' do
@@ -19,7 +19,7 @@ describe CoRE::CoAP::Client do
 
   describe 'modifying methods' do
     before do
-      @client       = CoRE::CoAP::Client.new(max_payload: 512)
+      @client       = Client.new(max_payload: 512)
       @payload      = Faker::Lorem.paragraphs(5).join("\n")
       @payload_utf8 = '♥' + @payload
     end

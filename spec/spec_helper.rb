@@ -13,3 +13,5 @@ end
 def fixture(name)
   File.read(File.join(fixture_path, name))
 end
+
+include CoRE::CoAP
