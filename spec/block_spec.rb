@@ -82,13 +82,16 @@ describe Block do
       end
     end
 
-    it 'should be faster than Math.log2' do
-      i = rand(2**15)
+    # On JRuby execution time for both is 0.0
+    unless defined? JRuby
+      it 'should be faster than Math.log2' do
+        i = rand(2**15)
 
-      a = Benchmark.realtime { Block.log2(i) }
-      b = Benchmark.realtime { Math.log2(i).floor }
+        a = Benchmark.realtime { Block.log2(x) }
+        b = Benchmark.realtime { Math.log2(x).floor }
 
-      expect(a).to be < b
+        expect(a).to be < b
+      end
     end
   end
 end
