@@ -23,7 +23,7 @@ module CoRE
       end
 
       # The variable-length binary (vlb) numbers defined in CoRE-CoAP Appendix A.
-      def vlb_encode n
+      def vlb_encode(n)
         n = Integer(n)
         v = empty_buffer
 
@@ -39,7 +39,7 @@ module CoRE
         v.reverse!
       end
 
-      def vlb_decode s
+      def vlb_decode(s)
         n = 0
         s.each_byte { |b| n <<= 8; n += b }
         n
@@ -72,7 +72,8 @@ module CoRE
       # n must be 2**k
       # Returns k
       def number_of_bits_up_to(n)
-        Math.frexp(n-1)[1]
+#       Math.frexp(n-1)[1]
+        Math.log2(n).floor
       end
 
       def scheme_and_authority_encode(host, port)

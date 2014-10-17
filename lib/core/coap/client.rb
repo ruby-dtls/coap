@@ -172,7 +172,7 @@ module CoRE
 
         validate_arguments!(host, port, path, payload)
 
-        szx = 2 ** Block.log2(@max_payload)
+        szx = 2 ** CoAP.number_of_bits_up_to(@max_payload)
 
         # Initialize block2 with payload size.
         block2 = Block.new(0, false, szx)

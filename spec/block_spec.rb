@@ -4,35 +4,47 @@ require 'benchmark'
 describe Block do
   before do
     @block = Block.new(0, false, 16)
-    @data  = '+' * 42
+    @data1 = '+' * 42
+    @data2 = '+' * 32
   end
 
   describe '#chunk' do
     it 'should return chunks' do
       a = [0, 1, 2, 3].map do |i|
         @block.num = i
-        @block.chunk(@data)
+        @block.chunk(@data1)
       end
 
       expect(a).to eq(['+' * 16, '+' * 16, '+' * 10, nil])
     end
   end
 
+  describe '#chunk_count' do
+    it 'should return correct count' do
+      expect(@block.chunk_count(@data1)).to eq(3)
+      expect(@block.chunk_count(@data2)).to eq(2)
+    end
+  end
+
   describe '#last?' do
-    [42, 32].each do |size|
-      @data = '+' * size
-
-      it 'should return false unless last chunk' do
-        [0, 1, 3, 4, 5].each do |num|
-          @block.num = num
-          expect(@block.last?(@data)).to be false
-        end
+    it 'should return false unless last chunk' do
+      [0, 1, 3].each do |num|
+        @block.num = num
+        expect(@block.last?(@data1)).to be false
       end
 
-      it 'should return true if last chunk' do
-        @block.num = 2
-        expect(@block.last?(@data)).to be true
+      [0, 2, 3].each do |num|
+        @block.num = num
+        expect(@block.last?(@data2)).to be false
       end
+    end
+
+    it 'should return true if last chunk' do
+      @block.num = 2
+      expect(@block.last?(@data1)).to be true
+
+      @block.num = 1
+      expect(@block.last?(@data2)).to be true
     end
   end
 
@@ -72,26 +84,6 @@ describe Block do
       b = Block.new(a.num, a.more, a.size).encode
 
       expect(b).to eq(i)
-    end
-  end
-
-  describe '.log2' do
-    it 'should equal Math.log2 for a VALID_SIZE' do
-      Block::VALID_SIZE.each do |size|
-        expect(Block.log2(size)).to eq(Math.log2(size))
-      end
-    end
-
-    # On JRuby execution time for both is 0.0
-    unless defined? JRuby
-      it 'should be faster than Math.log2' do
-        i = rand(2**15)
-
-        a = Benchmark.realtime { Block.log2(x) }
-        b = Benchmark.realtime { Math.log2(x).floor }
-
-        expect(a).to be < b
-      end
     end
   end
 end

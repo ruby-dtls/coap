@@ -23,6 +23,7 @@ module CoRE
       end
 
       def chunk_count(data)
+        return 0 if data == '' || data.nil?
         i = data.size % self.size == 0 ? 0 : 1
         data.size / self.size + i
       end
@@ -44,7 +45,7 @@ module CoRE
       end
 
       def encode
-        @encoded = @num << 4 | (@more ? 1 : 0) << 3 | Block.log2(@size) - 4
+        @encoded = @num << 4 | (@more ? 1 : 0) << 3 | CoAP.number_of_bits_up_to(@size) - 4
       end
 
       def last?(data)
@@ -76,17 +77,6 @@ module CoRE
 
       def self.chunkify(data, size)
         data.bytes.each_slice(size).map { |c| c.pack('C*') }
-      end
-
-      def self.log2(x)
-        y = 0
-
-        while x != 1
-          x = x >> 1
-          y += 1
-        end
-
-        y
       end
     end
   end
