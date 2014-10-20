@@ -25,6 +25,8 @@ module CoRE
         @socket
       end
 
+      # Receive from socket and return parsed CoAP message. (ACK is sent on CON
+      # messages.)
       def receive(options = {})
         retry_count = options[:retry_count] || 0
         timeout = (options[:timeout] || @recv_timeout) ** (retry_count + 1)
@@ -45,6 +47,7 @@ module CoRE
         answer
       end
 
+      # Send +message+.
       def send(message, host, port = CoAP::PORT)
         message = message.to_wire if message.respond_to?(:to_wire)
         # In MRI and Rubinius, the Socket::MSG_DONTWAIT option is 64.
@@ -53,6 +56,8 @@ module CoRE
         @socket.send(message, 64, host, port)
       end
 
+      # Send +message+ (retransmit if necessary) and wait for answer. Returns
+      # answer.
       def request(message, host, port = CoAP::PORT)
         retry_count = 0
 
@@ -99,6 +104,7 @@ module CoRE
       end
 
       class << self
+        # Return Ether instance with socket matching address family.
         def from_host(host, options = {})
           if IPAddr.new(host).ipv6? 
             new
@@ -111,16 +117,19 @@ module CoRE
           retry
         end
 
+        # Instanciate matching Ether and send message.
         def send(*args)
           invoke(:send, *args)
         end
 
+        # Instanciate matching Ether and perform request.
         def request(*args)
           invoke(:request, *args)
         end
 
         private
 
+        # Instanciate matching Ether and invoke +method+ on instance.
         def invoke(method, *args)
           options = {}
           options = args.pop if args.last.is_a? Hash
