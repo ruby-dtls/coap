@@ -4,8 +4,7 @@ module CoRE
   module CoAP
     # CoAP client library
     class Client
-      attr_accessor :max_payload, :max_retransmit, :recv_timeout, :host, :port,
-        :socket
+      attr_accessor :max_payload, :host, :port
 
       # @param  options   Valid options are (all optional): max_payload
       #                   (maximum payload size, default 256), max_retransmit
@@ -14,25 +13,22 @@ module CoRE
       #                   host (destination host), post (destination port,
       #                   default 5683).
       def initialize(options = {})
-        @max_payload    = options[:max_payload]     || 256
+        @max_payload = options[:max_payload] || 256
 
         @host = options[:host]
         @port = options[:port] || CoAP::PORT
 
         @options = options
 
-#       @socket = MySocket.new(UDPSocket, @recv_timeout)
-#       @retry_count = 0
-
         @logger = CoAP.logger
       end
 
       # Enable DTLS socket.
-#     def use_dtls
-#       require 'CoDTLS'
-#       @socket = MySocket.new(CoDTLS::SecureSocket, @recv_timeout)
-#       self
-#     end
+      def use_dtls
+        require 'CoDTLS'
+        @options[:socket] = CoDTLS::SecureSocket
+        self
+      end
 
       # GET
       #
@@ -44,7 +40,6 @@ module CoRE
       #
       # @return CoAP::Message
       def get(*args)
-#       @retry_count = 0
         client(:get, *args)
       end
 
@@ -69,7 +64,6 @@ module CoRE
       #
       # @return CoAP::Message
       def post(*args)
-#       @retry_count = 0
         client(:post, *args)
       end
 
@@ -94,7 +88,6 @@ module CoRE
       #
       # @return CoAP::Message
       def put(*args)
-#       @retry_count = 0
         client(:put, *args)
       end
 
@@ -119,7 +112,6 @@ module CoRE
       #
       # @return CoAP::Message
       def delete(*args)
-#       @retry_count = 0
         client(:delete, *args)
       end
 
@@ -229,7 +221,6 @@ module CoRE
         # Payload is not fully transmitted.
         # TODO Get rid of nasty recursion.
         if block1.more
-#         fail 'Max Recursion' if @retry_count > 10
           return client(method, path, host, port, payload, message.options)
         end
 
@@ -241,8 +232,6 @@ module CoRE
 
           options.delete(:block1) # end block1
           options[:block2] = block2.encode
-
-#         fail 'Max Recursion' if @retry_count > 50
 
           local_recv_parsed = client(method, path, host, port, nil, options)
 
@@ -258,6 +247,8 @@ module CoRE
 
         recv_parsed
       end
+
+      private
 
       # Decode CoAP URIs.
       def decode_uri(uri)
