@@ -69,22 +69,30 @@ module CoRE
           retry
         end
 
-        if message.mid != response.mid
-          raise 'Wrong message id.'
-        end
+        check_mid(message, response)
 
         response = receive(timeout: 10) if seperate?(response)
 
-        # Check if response token mismatches.
-        if message.options[:token] != response.options[:token]
-          raise 'Received message with wrong token.'
-        end
+        check_token(message, response)
 
         response
       end
 
       private
 
+      # Check whether response mid mismatches.
+      def check_mid(request, response)
+        raise 'Wrong message id.' if request.mid != response.mid
+      end
+
+      # Check whether response token mismatches.
+      def check_token(request, response)
+        if request.options[:token] != response.options[:token]
+          raise 'Wrong token.'
+        end
+      end
+
+      # Check if answer is seperated.
       def seperate?(response)
         r = response
         r.tt == :ack && r.payload.empty? && r.mcode == [0, 0]
