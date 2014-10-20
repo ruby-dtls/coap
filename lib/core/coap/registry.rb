@@ -9,10 +9,11 @@ module CoRE
       end
 
       CONTENT_FORMATS = load_yaml(:content_formats).freeze
+      CONTENT_FORMATS_INVERTED = CONTENT_FORMATS.invert.freeze
 
       def self.convert_content_format(string_or_integer)
         if string_or_integer.is_a? String
-          CONTENT_FORMATS.invert[string_or_integer]
+          CONTENT_FORMATS_INVERTED[string_or_integer]
         else
           CONTENT_FORMATS[string_or_integer]
         end
