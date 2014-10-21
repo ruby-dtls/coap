@@ -2,17 +2,15 @@ require 'spec_helper'
 require 'benchmark'
 
 describe Block do
-  before do
-    @block = Block.new(0, false, 16)
-    @data1 = '+' * 42
-    @data2 = '+' * 32
-  end
+  subject { Block.new(0, false, 16) }
+  let(:data1) { '+' * 42 }
+  let(:data2) { '+' * 32 }
 
   describe '#chunk' do
     it 'should return chunks' do
       a = [0, 1, 2, 3].map do |i|
-        @block.num = i
-        @block.chunk(@data1)
+        subject.num = i
+        subject.chunk(data1)
       end
 
       expect(a).to eq(['+' * 16, '+' * 16, '+' * 10, nil])
@@ -21,36 +19,36 @@ describe Block do
 
   describe '#chunk_count' do
     it 'should return correct count' do
-      expect(@block.chunk_count(@data1)).to eq(3)
-      expect(@block.chunk_count(@data2)).to eq(2)
+      expect(subject.chunk_count(data1)).to eq(3)
+      expect(subject.chunk_count(data2)).to eq(2)
     end
   end
 
   describe '#last?' do
     it 'should return false unless last chunk' do
       [0, 1, 3].each do |num|
-        @block.num = num
-        expect(@block.last?(@data1)).to be false
+        subject.num = num
+        expect(subject.last?(data1)).to be false
       end
 
       [0, 2, 3].each do |num|
-        @block.num = num
-        expect(@block.last?(@data2)).to be false
+        subject.num = num
+        expect(subject.last?(data2)).to be false
       end
     end
 
     it 'should return true if last chunk' do
-      @block.num = 2
-      expect(@block.last?(@data1)).to be true
+      subject.num = 2
+      expect(subject.last?(data1)).to be true
 
-      @block.num = 1
-      expect(@block.last?(@data2)).to be true
+      subject.num = 1
+      expect(subject.last?(data2)).to be true
     end
   end
 
   describe '#encode' do
     it 'should work with examples' do
-      expect(@block.encode).to eq(0)
+      expect(subject.encode).to eq(0)
 
       block = Block.new(0, true, 16)
       expect(block.encode).to eq(8)
