@@ -49,6 +49,7 @@ module CoRE
       end
 
       def last?(data)
+        return true if data.empty? || data.nil?
         self.num == chunk_count(data) - 1
       end
 

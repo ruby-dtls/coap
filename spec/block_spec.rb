@@ -35,6 +35,11 @@ describe Block do
         subject.num = num
         expect(subject.last?(data2)).to be false
       end
+
+      [0, 1, 2].each do |num|
+        subject.num = num
+        expect(subject.last?('')).to be true
+      end
     end
 
     it 'should return true if last chunk' do
