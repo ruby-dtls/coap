@@ -184,7 +184,7 @@ module CoRE
         end
 
         # Create CoAP message struct.
-        message = initialize_message(method, host, port, path, payload, block2)
+        message = initialize_message(method, path, payload)
 
         # If more than 1 chunk, we need to use block1.
         if !payload.nil? && chunks.size > 1
@@ -260,7 +260,7 @@ module CoRE
         uri
       end
 
-      def initialize_message(method, host, port, path, payload = nil, block2 = nil)
+      def initialize_message(method, path, payload = nil)
         mid   = SecureRandom.random_number(0xffff)
         token = SecureRandom.random_number(0xff)
 
