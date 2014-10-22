@@ -8,8 +8,9 @@ module CoRE
       attr_reader :address_family, :socket
 
       def initialize(options = {})
-        @recv_timeout     = options[:recv_timeout]   || DEFAULT_RECV_TIMEOUT
         @max_retransmit   = options[:max_retransmit] || 4
+        @recv_timeout     = options[:recv_timeout]   || DEFAULT_RECV_TIMEOUT
+        @retransmit       = options[:retransmit]     || true
 
         @socket           = options[:socket]
 
@@ -65,6 +66,8 @@ module CoRE
           send(message, host, port)
           response = receive(retry_count: retry_count)
         rescue Timeout::Error
+          return unless @retransmit
+
           retry_count += 1
 
           if retry_count > @max_retransmit
@@ -107,7 +110,7 @@ module CoRE
         # Return Ether instance with socket matching address family.
         def from_host(host, options = {})
           if IPAddr.new(host).ipv6? 
-            new
+            new(options)
           else
             new(options.merge(address_family: Socket::AF_INET))
           end
@@ -135,7 +138,7 @@ module CoRE
           options = args.pop if args.last.is_a? Hash
 
           if options[:socket]
-            ether = Ether.new(socket: options[:socket])
+            ether = Ether.new(options)
           else
             ether = from_host(args[1], options)
           end

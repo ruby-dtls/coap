@@ -13,6 +13,7 @@ module CoRE
 
           mcode = h.delete(:mcode) || args.shift
 
+          # TODO Allow later setting of mcode by Float.
           case mcode
             when Integer
               mcode = METHODS[mcode] || [mcode >> 5, mcode & 0x1f]
@@ -73,11 +74,10 @@ module CoRE
       end
 
       def to_s
-        s  = mcode_readable
-        s += ' '
-        s += CoAP.path_encode(self.options[:uri_path])
-        s += ' '
-        s += CoAP.query_encode(self.options[:uri_query])
+        path  = CoAP.path_encode(self.options[:uri_path])
+        query = CoAP.query_encode(self.options[:uri_query])
+
+        [mcode_readable, path, query].join(' ')
       end
 
       def to_wire
