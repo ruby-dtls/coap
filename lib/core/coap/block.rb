@@ -23,7 +23,7 @@ module CoRE
       end
 
       def chunk_count(data)
-        return 0 if data == '' || data.nil?
+        return 0 if data.nil? || data.empty?
         i = data.size % self.size == 0 ? 0 : 1
         data.size / self.size + i
       end
@@ -46,6 +46,11 @@ module CoRE
 
       def encode
         @encoded = @num << 4 | (@more ? 1 : 0) << 3 | CoAP.number_of_bits_up_to(@size) - 4
+      end
+
+      def included_by?(body)
+        return true if self.num == 0 && (body.nil? || body.empty?)
+        self.num < chunk_count(body)
       end
 
       def last?(data)

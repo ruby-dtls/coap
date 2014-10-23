@@ -23,6 +23,43 @@ describe Block do
       expect(subject.chunk_count(data2)).to eq(2)
     end
   end
+  
+  describe '#included_by?' do
+    it 'should return true if body empty and index 0' do
+      expect(subject.included_by?('')).to be(true)
+      expect(subject.included_by?(nil)).to be(true)
+    end
+
+    it 'should return false if body empty and index > 0' do
+      subject.num = 1
+      expect(subject.included_by?('')).to be(false)
+      expect(subject.included_by?(nil)).to be(false)
+    end
+
+    it 'should return true if chunk index exists' do
+      [0, 1, 2].each do |num|
+        subject.num = num
+        expect(subject.included_by?(data1)).to be(true)
+      end
+
+      [0, 1].each do |num|
+        subject.num = num
+        expect(subject.included_by?(data2)).to be(true)
+      end
+    end
+
+    it 'should return false if chunk index does not exists' do
+      [3, 4, 5].each do |num|
+        subject.num = num
+        expect(subject.included_by?(data1)).to be(false)
+      end
+
+      [2, 3].each do |num|
+        subject.num = num
+        expect(subject.included_by?(data2)).to be(false)
+      end
+    end
+  end
 
   describe '#last?' do
     it 'should return false unless last chunk' do
