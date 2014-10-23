@@ -10,9 +10,13 @@ module CoRE
       def initialize(options = {})
         @max_retransmit   = options[:max_retransmit] || 4
         @recv_timeout     = options[:recv_timeout]   || DEFAULT_RECV_TIMEOUT
-        @retransmit       = options[:retransmit]     || true
-
         @socket           = options[:socket]
+
+        @retransmit       = if options[:retransmit].nil?
+                              true
+                            else
+                              !!options[:retransmit]
+                            end
 
         if @socket
           @socket_class   = @socket.class
@@ -66,7 +70,7 @@ module CoRE
           send(message, host, port)
           response = receive(retry_count: retry_count)
         rescue Timeout::Error
-          return unless @retransmit
+          raise unless @retransmit
 
           retry_count += 1
 
