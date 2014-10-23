@@ -28,26 +28,57 @@ describe Block do
     it 'should return false unless last chunk' do
       [0, 1, 3].each do |num|
         subject.num = num
-        expect(subject.last?(data1)).to be false
+        expect(subject.last?(data1)).to be(false)
       end
 
       [0, 2, 3].each do |num|
         subject.num = num
-        expect(subject.last?(data2)).to be false
+        expect(subject.last?(data2)).to be(false)
       end
 
       [0, 1, 2].each do |num|
         subject.num = num
-        expect(subject.last?('')).to be true
+        expect(subject.last?('')).to be(true)
+        expect(subject.last?(nil)).to be(true)
       end
     end
 
     it 'should return true if last chunk' do
       subject.num = 2
-      expect(subject.last?(data1)).to be true
+      expect(subject.last?(data1)).to be(true)
 
       subject.num = 1
-      expect(subject.last?(data2)).to be true
+      expect(subject.last?(data2)).to be(true)
+    end
+  end
+
+  describe '#more?' do
+    it 'should return true unless last chunk or bigger' do
+      [0, 1].each do |num|
+        subject.num = num
+        expect(subject.more?(data1)).to be(true)
+      end
+
+      [2, 3].each do |num|
+        subject.num = num
+        expect(subject.more?(data1)).to be(false)
+      end
+
+      [0].each do |num|
+        subject.num = num
+        expect(subject.more?(data2)).to be(true)
+      end
+
+      [1, 2].each do |num|
+        subject.num = num
+        expect(subject.more?(data2)).to be(false)
+      end
+
+      [0, 1, 2].each do |num|
+        subject.num = num
+        expect(subject.more?('')).to be(false)
+        expect(subject.more?(nil)).to be(false)
+      end
     end
   end
 

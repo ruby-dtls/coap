@@ -49,7 +49,7 @@ module CoRE
       end
 
       def last?(data)
-        return true if data.empty? || data.nil?
+        return true if data.nil? || data.empty?
         self.num == chunk_count(data) - 1
       end
 
@@ -60,6 +60,11 @@ module CoRE
 
         @more = !!v
         @decoded[1] = @more
+      end
+
+      def more?(data)
+        return false if data.nil? || data.empty?
+        data.bytesize > (self.num + 1) * self.size
       end
 
       def num=(v)
