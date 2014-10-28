@@ -44,12 +44,25 @@ describe Ether do
   end
 
   describe '.send' do
-    it 'should resolve' do
-      expect { Ether.send('hello', '127.0.0.1') }.not_to raise_error
-      expect { Ether.send('hello', '::1') }.not_to raise_error
-      expect { Ether.send('hello', 'ipv4.orgizm.net') }.not_to raise_error
-      expect { Ether.send('hello', 'orgizm.net') }.not_to raise_error
-      expect { Ether.send('hello', '.') }.to raise_error(Resolv::ResolvError)
+    context 'resolve' do
+      it 'no error for IP addresses' do
+        expect { Ether.send('hello', '127.0.0.1') }.not_to raise_error
+        expect { Ether.send('hello', '::1') }.not_to raise_error
+      end
+
+      it 'error for invalid host' do
+        expect { Ether.send('hello', '.') }.to raise_error(Resolv::ResolvError)
+      end
+
+      context 'hostnames' do
+        it 'ipv4' do
+          expect(Ether.from_host('ipv4.orgizm.net').ipv6?).to be(false)
+        end
+
+        it 'ipv6' do
+          expect(Ether.from_host('orgizm.net').ipv6?).to be(true)
+        end
+      end
     end
   end
 end

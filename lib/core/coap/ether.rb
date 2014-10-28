@@ -28,7 +28,7 @@ module CoRE
         end
 
         # http://lists.apple.com/archives/darwin-kernel/2014/Mar/msg00012.html
-        if OS.osx?
+        if OS.osx? && ipv6?
           ifname  = Socket.if_up?('en1') ? 'en1' : 'en0'
           ifindex = Socket.if_nametoindex(ifname)
 
@@ -37,6 +37,10 @@ module CoRE
         end
 
         @socket
+      end
+
+      def ipv6?
+        @address_family == Socket::AF_INET6
       end
 
       # Receive from socket and return parsed CoAP message. (ACK is sent on CON
@@ -59,16 +63,6 @@ module CoRE
         end
 
         answer
-      end
-
-      # Send +message+.
-      def send(message, host, port = CoAP::PORT)
-        message = message.to_wire if message.respond_to?(:to_wire)
-
-        # In MRI and Rubinius, the Socket::MSG_DONTWAIT option is 64.
-        # It is not defined by JRuby.
-        # TODO Is it really necessary?
-        @socket.send(message, 64, host, port)
       end
 
       # Send +message+ (retransmit if necessary) and wait for answer. Returns
@@ -100,6 +94,16 @@ module CoRE
         response
       end
 
+      # Send +message+.
+      def send(message, host, port = CoAP::PORT)
+        message = message.to_wire if message.respond_to?(:to_wire)
+
+        # In MRI and Rubinius, the Socket::MSG_DONTWAIT option is 64.
+        # It is not defined by JRuby.
+        # TODO Is it really necessary?
+        @socket.send(message, 64, host, port)
+      end
+
       private
 
       # Check whether response mid mismatches.
@@ -129,7 +133,7 @@ module CoRE
             new(options.merge(address_family: Socket::AF_INET))
           end
         # MRI throws IPAddr::InvalidAddressError, JRuby an ArgumentError
-        rescue StandardError
+        rescue IPAddr::InvalidAddressError, ArgumentError
           host = Resolver.address(host)
           retry
         end
