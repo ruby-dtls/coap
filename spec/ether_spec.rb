@@ -59,8 +59,10 @@ describe Ether do
           expect(Ether.from_host('ipv4.orgizm.net').ipv6?).to be(false)
         end
 
-        it 'ipv6' do
-          expect(Ether.from_host('orgizm.net').ipv6?).to be(true)
+        if ENV['IPv4'].nil?
+          it 'ipv6' do
+            expect(Ether.from_host('orgizm.net').ipv6?).to be(true)
+          end
         end
       end
     end

@@ -1,11 +1,13 @@
 require 'spec_helper'
 
 describe Resolver do
-  context 'ipv6' do
-    subject { IPAddr.new(Resolver.address('orgizm.net')) }
+  if ENV['IPv4'].nil?
+    context 'ipv6' do
+      subject { IPAddr.new(Resolver.address('orgizm.net')) }
 
-    it { expect { subject }.not_to raise_error }
-    it { expect(subject.ipv6?).to be(true) }
+      it { expect { subject }.not_to raise_error }
+      it { expect(subject.ipv6?).to be(true) }
+    end
   end
 
   context 'ipv4' do
