@@ -27,6 +27,15 @@ module CoRE
           @socket         = @socket_class.new(@address_family)
         end
 
+        # http://lists.apple.com/archives/darwin-kernel/2014/Mar/msg00012.html
+        if OS.osx?
+          ifname  = Socket.if_up?('en1') ? 'en1' : 'en0'
+          ifindex = Socket.if_nametoindex(ifname)
+
+          s = @socket.to_io rescue @socket
+          s.setsockopt(:IPPROTO_IPV6, :IPV6_MULTICAST_IF, [ifindex].pack('i_'))
+        end
+
         @socket
       end
 
@@ -55,6 +64,7 @@ module CoRE
       # Send +message+.
       def send(message, host, port = CoAP::PORT)
         message = message.to_wire if message.respond_to?(:to_wire)
+
         # In MRI and Rubinius, the Socket::MSG_DONTWAIT option is 64.
         # It is not defined by JRuby.
         # TODO Is it really necessary?
