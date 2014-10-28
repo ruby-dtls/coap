@@ -133,7 +133,7 @@ module CoRE
             new(options.merge(address_family: Socket::AF_INET))
           end
         # MRI throws IPAddr::InvalidAddressError, JRuby an ArgumentError
-        rescue IPAddr::InvalidAddressError, ArgumentError
+        rescue ArgumentError
           host = Resolver.address(host)
           retry
         end
