@@ -6,3 +6,6 @@ end
 require 'core/link'
 require 'core/coap'
 require 'core/hexdump'
+require 'core/os'
+
+require 'core/core_ext/socket'
