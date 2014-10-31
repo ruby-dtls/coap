@@ -67,7 +67,7 @@ describe Client do
       @t1 = Thread.start do
         subject.observe \
           '/obs', 'vs0.inf.ethz.ch', nil,
-          ->(m) { @answers << m }
+          ->(s, m) { @answers << m }
       end
 
       Timeout.timeout(12) do
