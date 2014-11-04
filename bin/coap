@@ -7,12 +7,6 @@ require 'uri'
 $:.unshift File.expand_path('../lib', File.dirname(__FILE__))
 require 'coap'
 
-def observe_callback(data, socket)
-  if $DEBUG
-    pp socket.inspect, data.inspect
-  end
-end
-
 def usage
   $stderr.puts <<EOF
 Usage: #{File.basename($0)} [options] <method> <uri>
@@ -90,7 +84,19 @@ when :delete
   client.delete_by_uri(uri)
 
 when :observe
-  client.observe_by_uri(uri, method(:observe_callback))
+  callback = ->(socket, message) do
+    if output
+      output.puts message.payload
+    else
+      pp message
+    end
+  end
+
+  begin
+    client.observe_by_uri(uri, callback)
+  rescue Interrupt
+    exit
+  end
 end
 
 if output

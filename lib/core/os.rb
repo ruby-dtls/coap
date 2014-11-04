@@ -1,7 +1,7 @@
 module CoRE
   module OS
     def self.linux?
-      !!(os =~ /^linux/)
+      @@linux ||= !!(os =~ /^linux/)
     end
 
     def self.os
@@ -9,7 +9,7 @@ module CoRE
     end
 
     def self.osx?
-      !!(os =~ /^darwin/)
+      @@osx ||= !!(os =~ /^darwin/)
     end
   end
 end

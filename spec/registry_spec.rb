@@ -29,6 +29,10 @@ describe Registry do
           expect(Registry.convert_content_format(v)).to eq(k)
         end
       end
+
+      it 'should convert without charset' do
+        expect(Registry.convert_content_format('text/plain')).to eq(0)
+      end
     end
   end
 end

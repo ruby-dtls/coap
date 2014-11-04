@@ -10,7 +10,7 @@ module CoRE
       def observe(message, callback, socket)
         n = message.options[:observe]
 
-        callback.call(message)
+        callback.call(socket, message)
 
         # This does not seem to be able to cope with concurrency.
         loop do
@@ -19,7 +19,7 @@ module CoRE
           next unless answer.options[:observe]
 
           if update?(n, answer.options[:observe])
-            callback.call(answer)
+            callback.call(socket, answer)
           end
         end
       end

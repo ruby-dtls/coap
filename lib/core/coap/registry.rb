@@ -11,12 +11,20 @@ module CoRE
       CONTENT_FORMATS = load_yaml(:content_formats).freeze
       CONTENT_FORMATS_INVERTED = CONTENT_FORMATS.invert.freeze
 
-      def self.convert_content_format(string_or_integer)
-        if string_or_integer.is_a? String
-          CONTENT_FORMATS_INVERTED[string_or_integer]
+      def self.convert_content_format(cf)
+        if cf.is_a? String
+          CONTENT_FORMATS_INVERTED[cf] || without_charset(cf)
         else
-          CONTENT_FORMATS[string_or_integer]
+          CONTENT_FORMATS[cf]
         end
+      end
+
+      private
+
+      def self.without_charset(cf)
+        CONTENT_FORMATS_INVERTED.select { |k| k =~ /^#{cf}/ }.first[1]
+      rescue NoMethodError
+        nil
       end
     end
   end

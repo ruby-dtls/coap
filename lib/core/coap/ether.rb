@@ -83,7 +83,7 @@ module CoRE
             raise "Maximum retransmission count of #{@max_retransmit} reached."
           end
 
-          retry
+          retry unless message.tt == :non
         end
 
         check_mid(message, response)
