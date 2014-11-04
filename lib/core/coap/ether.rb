@@ -69,12 +69,13 @@ module CoRE
       # answer.
       def request(message, host, port = CoAP::PORT)
         retry_count = 0
+        retransmit = @retransmit && message.tt == :con
 
         begin
           send(message, host, port)
           response = receive(retry_count: retry_count)
         rescue Timeout::Error
-          raise unless @retransmit
+          raise unless retransmit
 
           retry_count += 1
 
