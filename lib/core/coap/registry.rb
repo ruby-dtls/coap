@@ -22,6 +22,7 @@ module CoRE
       private
 
       def self.without_charset(cf)
+        cf = cf.split(';').first
         CONTENT_FORMATS_INVERTED.select { |k| k =~ /^#{cf}/ }.first[1]
       rescue NoMethodError
         nil

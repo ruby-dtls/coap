@@ -32,6 +32,7 @@ describe Registry do
 
       it 'should convert without charset' do
         expect(Registry.convert_content_format('text/plain')).to eq(0)
+        expect(Registry.convert_content_format('application/json; charset=utf-8')).to eq(50)
       end
     end
   end
