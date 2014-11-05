@@ -77,6 +77,10 @@ module CoRE
         @decoded[0] = @num
       end
 
+      def set_more!(body)
+        self.more = self.more?(body)
+      end
+
       def size=(v)
         unless VALID_SIZE.include?(v.to_i)
           raise ArgumentError, 'size MUST be power of 2 between 16 and 1024.'
