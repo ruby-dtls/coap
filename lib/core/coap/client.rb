@@ -185,6 +185,7 @@ module CoRE
 
         # Create CoAP message struct.
         message = initialize_message(method, path, payload)
+        message.tt = :non if options.delete(:tt) == :non
 
         # If more than 1 chunk, we need to use block1.
         if !payload.nil? && chunks.size > 1

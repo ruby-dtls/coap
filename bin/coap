@@ -16,6 +16,7 @@ Usage: #{File.basename($0)} [options] <method> <uri>
                                 STDOUT or a file path.
   --payload, -p       <string>  Payload for POST and PUT as string.
   --payload-file, -f  <file>    Read payload for POST and PUT from file.
+  --type, -t          <type>    Message type (con, non, ack, rst).
   --help, -h                    This usage message.
 
 EOF
@@ -29,12 +30,14 @@ opts = GetoptLong.new(
   ['--output',       '-o', GetoptLong::REQUIRED_ARGUMENT],
   ['--payload',      '-p', GetoptLong::REQUIRED_ARGUMENT],
   ['--payload-file', '-f', GetoptLong::REQUIRED_ARGUMENT],
+  ['--type',         '-t', GetoptLong::REQUIRED_ARGUMENT],
   ['--help',         '-h', GetoptLong::NO_ARGUMENT]
 )
 
 $DEBUG  = false
 output  = nil
 payload = nil
+options = {}
 
 opts.each do |opt, arg|
   case opt
@@ -50,6 +53,8 @@ opts.each do |opt, arg|
     payload = arg
   when '--payload-file'
     payload = File.read(arg)
+  when '--type'
+    options[:tt] = arg.to_sym
   when '--help'
     usage
   end
@@ -72,16 +77,16 @@ client = CoAP::Client.new
 
 answer = case method
 when :get
-  client.get_by_uri(uri)
+  client.get_by_uri(uri, payload, options)
 
 when :post
-  client.post_by_uri(uri, payload)
+  client.post_by_uri(uri, payload, options)
 
 when :put
-  client.put_by_uri(uri, payload)
+  client.put_by_uri(uri, payload, options)
 
 when :delete
-  client.delete_by_uri(uri)
+  client.delete_by_uri(uri, payload, options)
 
 when :observe
   callback = ->(socket, message) do
