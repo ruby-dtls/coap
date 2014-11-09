@@ -185,7 +185,11 @@ module CoRE
 
         # Create CoAP message struct.
         message = initialize_message(method, path, payload)
-        message.tt = :non if options.delete(:tt) == :non
+
+        # Set message type to non if chosen in global or local options.
+        if options.delete(:tt) == :non || @options.delete(:tt) == :non
+          message.tt = :non
+        end
 
         # If more than 1 chunk, we need to use block1.
         if !payload.nil? && chunks.size > 1
