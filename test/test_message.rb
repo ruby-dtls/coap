@@ -49,7 +49,7 @@ class TestMessage < Minitest::Test
   # XXX: now checks for trailing ampersands
   def test_query_decode
     assert_equal [], CoRE::CoAP.query_decode("")
-    assert_equal [""], CoRE::CoAP.query_decode("?")
+    assert_equal [], CoRE::CoAP.query_decode("?")
     assert_equal ["foo"], CoRE::CoAP.query_decode("?foo")
     assert_equal ["foo", ""], CoRE::CoAP.query_decode("?foo&")
     assert_equal ["foo", "bar"], CoRE::CoAP.query_decode("?foo&bar")

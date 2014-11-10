@@ -162,6 +162,8 @@ module CoRE
         host.nil? ? (host = @host unless @host.nil?) : @host = host
         port.nil? ? (port = @port unless @port.nil?) : @port = port
 
+        path, query = path.split('?')
+
         validate_arguments!(host, port, path, payload)
 
         szx = 2 ** CoAP.number_of_bits_up_to(@max_payload)
@@ -184,7 +186,7 @@ module CoRE
         end
 
         # Create CoAP message struct.
-        message = initialize_message(method, path, payload)
+        message = initialize_message(method, path, query, payload)
 
         # If more than 1 chunk, we need to use block1.
         if !payload.nil? && chunks.size > 1
@@ -260,7 +262,7 @@ module CoRE
         uri
       end
 
-      def initialize_message(method, path, payload = nil)
+      def initialize_message(method, path, query = nil, payload = nil)
         mid   = SecureRandom.random_number(0xffff)
         token = SecureRandom.random_number(0xff)
 
@@ -268,6 +270,10 @@ module CoRE
           uri_path: CoAP.path_decode(path),
           token: token
         }
+
+        unless query.nil?
+          options[:uri_query] = CoAP.query_decode(query)
+        end
 
         Message.new(:con, method, mid, payload, options)
       end

@@ -133,15 +133,11 @@ module CoRE
       def query_decode(query)
         return [] if query.empty?
 
-        if query[0] != '?'
-          raise ArgumentError, "Query #{query.inspect} did not start with ?" 
-        end
+        query = query[1..-1] if query[0] == '?'
 
         a = query.split('&', -1).map do |el|
           el.gsub(/%(..)/) { $1.to_i(16).chr(BIN) }.force_encoding(UTF8)
         end
-
-        a[0] = a[0][1..-1] # Remove '?'
 
         a
       end
