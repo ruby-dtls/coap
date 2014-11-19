@@ -10,15 +10,11 @@ module CoRE
       :type
     ]
 
-    DEFAULT_ATTRS = {
-      rel: 'hosts',
-    }
-
     attr_accessor :uri
 
     def initialize(uri, attrs = {})
       @uri = uri || raise(ArgumentError.new('URI can not be unset.'))
-      @attrs = DEFAULT_ATTRS.merge(attrs)
+      @attrs = attrs
 
       validate_attrs!(@attrs)
     end
@@ -88,10 +84,6 @@ module CoRE
       if (VALID_ATTRS | attrs.keys).size > VALID_ATTRS.size
         invalid = (VALID_ATTRS | attrs.keys) - VALID_ATTRS
         raise ArgumentError.new("Invalid attributes: #{invalid.join(', ')}.")
-      end
-      
-      if attrs[:rel].nil?
-        raise ArgumentError.new("Attribute «rel» unset.")
       end
     end
   end
