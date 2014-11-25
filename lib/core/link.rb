@@ -19,6 +19,12 @@ module CoRE
       validate_attrs!(@attrs)
     end
 
+    def merge!(hash)
+      a = @attrs.merge(hash)
+      validate_attrs!(a)
+      @attrs = a
+    end
+
     def method_missing(symbol, *args)
       attr = symbol.to_s.delete('=').to_sym
 
