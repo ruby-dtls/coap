@@ -1,8 +1,8 @@
-[![Gem Version](https://badge.fury.io/rb/coap.png)](http://badge.fury.io/rb/coap)
-[![Dependency Status](https://gemnasium.com/nning/coap.png)](https://gemnasium.com/nning/coap)
-[![Build Status](https://travis-ci.org/nning/coap.png?branch=master)](https://travis-ci.org/nning/coap)
-[![Coverage Status](https://coveralls.io/repos/nning/coap/badge.png?branch=master)](https://coveralls.io/r/nning/coap)
-[![Code Climate](https://codeclimate.com/github/nning/coap.png)](https://codeclimate.com/github/nning/coap)
+[![Gem Version](https://img.shields.io/gem/v/coap.svg)](http://badge.fury.io/rb/coap)
+[![Dependency Status](https://img.shields.io/gemnasium/nning/coap.svg)](https://gemnasium.com/nning/coap)
+[![Build Status](https://img.shields.io/travis/nning/coap.svg)](https://travis-ci.org/nning/coap)
+[![Coverage Status](https://img.shields.io/coveralls/nning/coap.svg)](https://coveralls.io/r/nning/coap)
+[![Code Climate](https://img.shields.io/codeclimate/github/nning/coap.svg)](https://codeclimate.com/github/nning/coap)
 
 # CoAP
 
