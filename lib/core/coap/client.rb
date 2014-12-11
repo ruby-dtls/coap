@@ -187,6 +187,7 @@ module CoRE
 
         # Create CoAP message struct.
         message = initialize_message(method, path, query, payload)
+        message.mid = options.delete(:mid) if options[:mid]
 
         # Set message type to non if chosen in global or local options.
         if options.delete(:tt) == :non || @options.delete(:tt) == :non

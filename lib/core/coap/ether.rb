@@ -86,7 +86,7 @@ module CoRE
           retry unless message.tt == :non
         end
 
-        check_mid(message, response)
+        check_mid(message, response) if message.tt == :con
 
         response = receive(timeout: 10) if seperate?(response)
 
