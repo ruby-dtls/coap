@@ -6,8 +6,8 @@ module CoRE
   # TODO Handle repeated attributes
   class Link
     VALID_ATTRS = [
-      :anchor, :ct, :hreflang, :if, :media, :obs, :rt, :rel, :rev, :sz, :title,
-      :type
+      :anchor, :ct, :exp, :hreflang, :if, :ins, :media, :obs, :rt, :rel, :rev,
+      :sz, :title, :type
     ]
 
     attr_accessor :uri
