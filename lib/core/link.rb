@@ -11,6 +11,7 @@ module CoRE
     ]
 
     attr_accessor :uri
+    attr_reader :attrs
 
     def initialize(uri, attrs = {})
       @uri = uri || raise(ArgumentError.new('URI can not be unset.'))
@@ -65,7 +66,7 @@ module CoRE
         attr, value = part.split('=')
 
         attr  = (attr + '=').to_sym
-        value = value.delete('"')
+        value = value.delete('"') unless value.nil?
 
         link.send(attr, value)
       end
