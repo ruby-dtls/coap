@@ -27,7 +27,7 @@ require 'timeout'
 require 'yaml'
 
 require 'core/coap/utility'
-require 'core/coap/codification'
+require 'core/coap/coding'
 require 'core/coap/types'
 require 'core/coap/options'
 require 'core/coap/registry'

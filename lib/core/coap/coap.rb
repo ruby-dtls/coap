@@ -5,7 +5,7 @@ module CoRE
   module CoAP
     extend Utility
 
-    include Codification
+    include Coding
     include Options
 
     EMPTY = empty_buffer.freeze

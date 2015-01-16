@@ -3,7 +3,7 @@
 
 module CoRE
   module CoAP
-    module Codification
+    module Coding
       BIN  = Encoding::BINARY
       UTF8 = Encoding::UTF_8
 
@@ -19,7 +19,7 @@ module CoRE
 
       # Also extend on include.
       def self.included(base)
-        base.send :extend, Codification
+        base.send :extend, Coding
       end
 
       # The variable-length binary (vlb) numbers defined in CoRE-CoAP Appendix A.
