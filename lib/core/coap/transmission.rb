@@ -1,81 +1,169 @@
 module CoRE
   module CoAP
+    # Socket abstraction.
     class Transmission
-      # CoAP Message Layer FSM
-      # https://tools.ietf.org/html/draft-ietf-lwig-coap-01#section-2.5.2
-      class MessageFSM
-        include Celluloid::FSM
+      DEFAULT_RECV_TIMEOUT = 2
 
-        default_state :closed
+      attr_accessor :max_retransmit, :recv_timeout
+      attr_reader :address_family, :socket
 
-        # Receive CON
-        #   Send ACK (accept) -> :closed
-        state :ack_pending, to: [:closed]
+      def initialize(options = {})
+        @max_retransmit   = options[:max_retransmit] || 4
+        @recv_timeout     = options[:recv_timeout]   || DEFAULT_RECV_TIMEOUT
+        @socket           = options[:socket]
 
-        # Sending and receiving
-        #   Send NON (unreliable_send)
-        #   Receive NON
-        #   Receive ACK
-        #   Receive CON -> :ack_pending
-        #   Send CON (reliable_send) -> :reliable_tx
-        state :closed, to: [:reliable_tx, :ack_pending]
+        @retransmit       = if options[:retransmit].nil?
+                              true
+                            else
+                              !!options[:retransmit]
+                            end
 
-        # Send CON
-        #   Retransmit until
-        #     Failure
-        #       Timeout (fail) -> :closed
-        #       Receive matching RST (fail) -> :closed
-        #       Cancel (cancel) -> :closed
-        #     Success
-        #       Receive matching ACK, NON (rx) -> :closed
-        #       Receive matching CON (rx) -> :ack_pending
-        state :reliable_tx, to: [:closed, :ack_pending]
+        if @socket
+          @socket_class   = @socket.class
+          @address_family = @socket.addr.first
+        else
+          @socket_class   = options[:socket_class]   || Celluloid::IO::UDPSocket
+          @address_family = options[:address_family] || Socket::AF_INET6
+          @socket         = @socket_class.new(@address_family)
+        end
+
+        # http://lists.apple.com/archives/darwin-kernel/2014/Mar/msg00012.html
+        if OS.osx? && ipv6?
+          ifname  = Socket.if_up?('en1') ? 'en1' : 'en0'
+          ifindex = Socket.if_nametoindex(ifname)
+
+          s = @socket.to_io rescue @socket
+          s.setsockopt(:IPPROTO_IPV6, :IPV6_MULTICAST_IF, [ifindex].pack('i_'))
+        end
+
+        @socket
       end
 
-      # CoAP Client Request/Response Layer FSM
-      # https://tools.ietf.org/html/draft-ietf-lwig-coap-01#section-2.5.1
-      class ClientFSM
-        include Celluloid::FSM
-
-        default_state :idle
-
-        # Idle
-        #   Outgoing request ((un)reliable_send) -> :waiting
-        state :idle, to: [:waiting]
-
-        # Waiting for response
-        #   Response received (accept, rx) -> :idle
-        #   Failure (fail) -> :idle
-        #   Cancel (cancel) -> :idle
-        state :waiting, to: [:idle]
+      def ipv6?
+        @address_family == Socket::AF_INET6
       end
 
-      # CoAP Server Request/Response Layer FSM
-      # https://tools.ietf.org/html/draft-ietf-lwig-coap-01#section-2.5.1
-      class ServerFSM
-        include Celluloid::FSM
+      # Receive from socket and return parsed CoAP message. (ACK is sent on CON
+      # messages.)
+      def receive(options = {})
+        retry_count = options[:retry_count] || 0
+        timeout = (options[:timeout] || @recv_timeout) ** (retry_count + 1)
 
-        default_state :idle
+        data = Timeout.timeout(timeout) do
+          @socket.recvfrom(1024)
+        end
 
-        # Idle
-        #   On NON (rx) -> :separate
-        #   On CON (rx) -> :serving
-        state :idle, to: [:separate, :serving]
+        answer = CoAP.parse(data[0].force_encoding('BINARY'))
 
-        # Separate
-        #   Respond ((un)reliable_send) -> :idle
-        state :separate, to: [:idle]
+        if answer.tt == :con
+          message = Message.new(:ack, 0, answer.mid, nil,
+            {token: answer.options[:token]})
 
-        # Serving
-        #   Respond (accept) -> :idle
-        #   Empty ACK (accept) -> :separate
-        state :serving, to: [:idle, :separate]
+          send(message, data[1][3])
+        end
+
+        answer
       end
 
-      attr_reader :fsm
+      # Send +message+ (retransmit if necessary) and wait for answer. Returns
+      # answer.
+      def request(message, host, port = CoAP::PORT)
+        retry_count = 0
+        retransmit = @retransmit && message.tt == :con
 
-      def initialize
-        @fsm = MessageFSM.new
+        begin
+          send(message, host, port)
+          response = receive(retry_count: retry_count)
+        rescue Timeout::Error
+          raise unless retransmit
+
+          retry_count += 1
+
+          if retry_count > @max_retransmit
+            raise "Maximum retransmission count of #{@max_retransmit} reached."
+          end
+
+          retry unless message.tt == :non
+        end
+
+        check_mid(message, response) if message.tt == :con
+
+        response = receive(timeout: 10) if seperate?(response)
+
+        check_token(message, response)
+
+        response
+      end
+
+      # Send +message+.
+      def send(message, host, port = CoAP::PORT)
+        message = message.to_wire if message.respond_to?(:to_wire)
+
+        # In MRI and Rubinius, the Socket::MSG_DONTWAIT option is 64.
+        # It is not defined by JRuby.
+        # TODO Is it really necessary?
+        @socket.send(message, 64, host, port)
+      end
+
+      private
+
+      # Check whether response mid mismatches.
+      def check_mid(request, response)
+        raise 'Wrong message id.' if request.mid != response.mid
+      end
+
+      # Check whether response token mismatches.
+      def check_token(request, response)
+        if request.options[:token] != response.options[:token]
+          raise 'Wrong token.'
+        end
+      end
+
+      # Check if answer is seperated.
+      def seperate?(response)
+        r = response
+        r.tt == :ack && r.payload.empty? && r.mcode == [0, 0]
+      end
+
+      class << self
+        # Return Transmission instance with socket matching address family.
+        def from_host(host, options = {})
+          if IPAddr.new(host).ipv6? 
+            new(options)
+          else
+            new(options.merge(address_family: Socket::AF_INET))
+          end
+        # MRI throws IPAddr::InvalidAddressError, JRuby an ArgumentError
+        rescue ArgumentError
+          host = Resolver.address(host)
+          retry
+        end
+
+        # Instanciate matching Transmission and send message.
+        def send(*args)
+          invoke(:send, *args)
+        end
+
+        # Instanciate matching Transmission and perform request.
+        def request(*args)
+          invoke(:request, *args)
+        end
+
+        private
+
+        # Instanciate matching Transmission and invoke +method+ on instance.
+        def invoke(method, *args)
+          options = {}
+          options = args.pop if args.last.is_a? Hash
+
+          if options[:socket]
+            transmission = Transmission.new(options)
+          else
+            transmission = from_host(args[1], options)
+          end
+
+          [transmission, transmission.__send__(method, *args)]
+        end
       end
     end
   end

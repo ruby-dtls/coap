@@ -222,7 +222,7 @@ module CoRE
         log_message(:sending_message, message)
 
         # Wait for answer and retry sending message if timeout reached.
-        @ether, recv_parsed = Ether.request(message, host, port, @options)
+        @transmission, recv_parsed = Transmission.request(message, host, port, @options)
 
         log_message(:received_message, recv_parsed)
 
@@ -250,7 +250,7 @@ module CoRE
 
         # Do we need to observe?
         if recv_parsed.options[:observe]
-          CoAP::Observer.new.observe(recv_parsed, observe_callback, @ether)
+          CoAP::Observer.new.observe(recv_parsed, observe_callback, @transmission)
         end
 
         recv_parsed
