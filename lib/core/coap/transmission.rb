@@ -49,11 +49,20 @@ module CoRE
         retry_count = options[:retry_count] || 0
         timeout = (options[:timeout] || @recv_timeout) ** (retry_count + 1)
 
+        mid   = options[:mid]
+        flags = mid.nil? ? 0 : Socket::MSG_PEEK
+
         data = Timeout.timeout(timeout) do
-          @socket.recvfrom(1024)
+          @socket.recvfrom(1024, flags)
         end
 
         answer = CoAP.parse(data[0].force_encoding('BINARY'))
+
+        if mid == answer.mid
+          Timeout.timeout(1) { @socket.recvfrom(1024) }
+        end
+
+        return if answer.nil?
 
         if answer.tt == :con
           message = Message.new(:ack, 0, answer.mid, nil,
@@ -73,7 +82,7 @@ module CoRE
 
         begin
           send(message, host, port)
-          response = receive(retry_count: retry_count)
+          response = receive(retry_count: retry_count, mid: message.mid)
         rescue Timeout::Error
           raise unless retransmit
 
@@ -86,11 +95,9 @@ module CoRE
           retry unless message.tt == :non
         end
 
-        check_mid(message, response) if message.tt == :con
-
-        response = receive(timeout: 10) if seperate?(response)
-
-        check_token(message, response)
+        if seperate?(response)
+          response = receive(timeout: 10, mid: message.mid)
+        end
 
         response
       end
@@ -106,18 +113,6 @@ module CoRE
       end
 
       private
-
-      # Check whether response mid mismatches.
-      def check_mid(request, response)
-        raise 'Wrong message id.' if request.mid != response.mid
-      end
-
-      # Check whether response token mismatches.
-      def check_token(request, response)
-        if request.options[:token] != response.options[:token]
-          raise 'Wrong token.'
-        end
-      end
 
       # Check if answer is seperated.
       def seperate?(response)

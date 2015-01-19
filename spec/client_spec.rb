@@ -6,7 +6,7 @@ describe Client do
   subject { Client.new }
 
   describe '#get' do
-    describe 'with seperated answer' do
+    describe 'with separated answer' do
       it 'should return correct mcode and payload' do
         answer = subject.get('/separate', 'coap.me')
         expect(answer.mcode).to eq([2, 5])
