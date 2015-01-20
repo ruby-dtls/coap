@@ -53,13 +53,13 @@ module CoRE
         flags = mid.nil? ? 0 : Socket::MSG_PEEK
 
         data = Timeout.timeout(timeout) do
-          @socket.recvfrom(1024, flags)
+          @socket.recvfrom(1152, flags)
         end
 
         answer = CoAP.parse(data[0].force_encoding('BINARY'))
 
         if mid == answer.mid
-          Timeout.timeout(1) { @socket.recvfrom(1024) }
+          Timeout.timeout(1) { @socket.recvfrom(1152) }
         end
 
         return if answer.nil?
