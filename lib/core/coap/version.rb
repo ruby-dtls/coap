@@ -1,5 +1,5 @@
 module CoRE
   module CoAP
-    VERSION = '0.0.17.dev'
+    VERSION = '0.1.0'
   end
 end
