@@ -77,7 +77,7 @@ module CoRE
         path  = CoAP.path_encode(self.options[:uri_path])
         query = CoAP.query_encode(self.options[:uri_query])
 
-        [mcode_readable, path, query].join(' ').rstrip
+        [tt, mcode_readable, path, query].join(' ').rstrip
       end
 
       def to_wire
