@@ -62,8 +62,6 @@ module CoRE
           Timeout.timeout(1) { @socket.recvfrom(1152) }
         end
 
-        return if answer.nil?
-
         if answer.tt == :con
           message = Message.new(:ack, 0, answer.mid, nil,
             {token: answer.options[:token]})
