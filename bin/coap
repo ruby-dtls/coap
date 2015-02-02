@@ -11,13 +11,14 @@ def usage
   $stderr.puts <<EOF
 Usage: #{File.basename($0)} [options] <method> <uri>
 
-  --debug, -d                   Extra debug output.
-  --output, -o        <target>  Redirect payload output. Target can be "-" for
-                                STDOUT or a file path.
-  --payload, -p       <string>  Payload for POST and PUT as string.
-  --payload-file, -f  <file>    Read payload for POST and PUT from file.
-  --type, -t          <type>    Message type (con, non, ack, rst).
-  --help, -h                    This usage message.
+  --content-format, -c  <string>  Content format.
+  --debug, -d                     Extra debug output.
+  --output, -o          <target>  Redirect payload output. Target can be "-" for
+                                  STDOUT or a file path.
+  --payload, -p         <string>  Payload for POST and PUT as string.
+  --payload-file, -f    <file>    Read payload for POST and PUT from file.
+  --type, -t            <type>    Message type (con, non, ack, rst).
+  --help, -h                      This usage message.
 
 EOF
   exit 1
@@ -26,12 +27,13 @@ end
 METHODS = CoAP::METHODS + [:observe]
 
 opts = GetoptLong.new(
-  ['--debug',        '-d', GetoptLong::NO_ARGUMENT],
-  ['--output',       '-o', GetoptLong::REQUIRED_ARGUMENT],
-  ['--payload',      '-p', GetoptLong::REQUIRED_ARGUMENT],
-  ['--payload-file', '-f', GetoptLong::REQUIRED_ARGUMENT],
-  ['--type',         '-t', GetoptLong::REQUIRED_ARGUMENT],
-  ['--help',         '-h', GetoptLong::NO_ARGUMENT]
+  ['--content-format',  '-c', GetoptLong::REQUIRED_ARGUMENT],
+  ['--debug',           '-d', GetoptLong::NO_ARGUMENT],
+  ['--output',          '-o', GetoptLong::REQUIRED_ARGUMENT],
+  ['--payload',         '-p', GetoptLong::REQUIRED_ARGUMENT],
+  ['--payload-file',    '-f', GetoptLong::REQUIRED_ARGUMENT],
+  ['--type',            '-t', GetoptLong::REQUIRED_ARGUMENT],
+  ['--help',            '-h', GetoptLong::NO_ARGUMENT]
 )
 
 $DEBUG  = false
@@ -41,6 +43,9 @@ options = {}
 
 opts.each do |opt, arg|
   case opt
+  when '--content-format'
+    cf = CoAP::Registry.convert_content_format(arg)
+    options[:content_format] = cf
   when '--debug'
     $DEBUG = true
   when '--output'
@@ -108,4 +113,12 @@ if output
   output.puts answer.payload
 else
   pp answer
+  case answer.options[:content_format]
+  when 50
+    require 'json'
+    pp JSON.parse(answer.payload)
+  when 60
+    require 'cbor'
+    pp CBOR.load(answer.payload)
+  end
 end
