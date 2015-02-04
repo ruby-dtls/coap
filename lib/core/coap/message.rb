@@ -83,10 +83,8 @@ module CoRE
       def to_wire
         # check and encode option values
         prepared_options = prepare_options
-        # puts "prepared_options: #{prepared_options}"
 
         token = (prepared_options.delete(CoAP::TOKEN_ON) || [nil])[0] || ''
-        puts "TOKEN: #{token.inspect}" unless token
 
         b1 = 0x40 | TTYPES_I[tt] << 4 | token.bytesize
         b2 = METHODS_I[mcode] || (mcode[0] << 5) + mcode[1]

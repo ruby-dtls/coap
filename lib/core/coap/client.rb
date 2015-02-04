@@ -269,13 +269,15 @@ module CoRE
       end
 
       def initialize_message(method, path, query = nil, payload = nil)
-        mid   = SecureRandom.random_number(0xffff)
-        token = SecureRandom.random_number(0xff)
+        mid = SecureRandom.random_number(0xffff)
 
         options = {
-          uri_path: CoAP.path_decode(path),
-          token: token
+          uri_path: CoAP.path_decode(path)
         }
+        
+        unless @options[:token] == false
+          options[:token] = SecureRandom.random_number(0xffffffff)
+        end
 
         unless query.nil?
           options[:uri_query] = CoAP.query_decode(query)
