@@ -217,6 +217,8 @@ module CoRE
         # Preserve user options.
         message.options[:block2] = options[:block2] unless options[:block2] == nil
         message.options[:observe] = options[:observe] unless options[:observe] == nil
+
+        options.delete(:block1)
         message.options.merge!(options)
 
         log_message(:sending_message, message)
