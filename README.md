@@ -40,14 +40,24 @@ Or install it yourself as:
 
 ## Usage
 
-### In your Ruby (on Rails) application
+### In your Application
 
 	require 'coap'
+
     CoAP::Client.new.get_by_uri('coap://coap.me/hello').payload
+	=> "world"
 
-See `test/test_client.rb` for more examples.
+	CoAP::Client.new.get('/hello', 'coap.me')
+	=> #<struct CoRE::CoAP::Message ver=1, tt=:ack, mcode=[2, 5], mid=51490, options={:max_age=>60, :token=>366862489, :content_format=>0}, payload="world">
 
-### Command Line Client
+	c = CoAP::Client.new(host: 'coap.me')
+	c.get('/hello')
+
+See [the API documentation at
+rubydoc.info](http://www.rubydoc.info/github/nning/coap/master/CoRE/CoAP/Client)
+or `test/test_client.rb` for more examples.
+
+### On the Command Line
 
 The command line client supports the basic CoAP methods.
 
