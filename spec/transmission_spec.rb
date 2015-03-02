@@ -59,10 +59,8 @@ describe Transmission do
           expect(Transmission.from_host('ipv4.orgizm.net').ipv6?).to be(false)
         end
 
-        if ENV['IPv4'].nil?
-          it 'ipv6' do
-            expect(Transmission.from_host('orgizm.net').ipv6?).to be(true)
-          end
+        it 'ipv6' do
+          expect(Transmission.from_host('orgizm.net', force_ipv6: true).ipv6?).to be(true)
         end
       end
     end

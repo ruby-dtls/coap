@@ -11,6 +11,7 @@ module CoRE
         @max_retransmit   = options[:max_retransmit] || 4
         @recv_timeout     = options[:recv_timeout]   || DEFAULT_RECV_TIMEOUT
         @socket           = options[:socket]
+        @force_ipv6       = !!options[:force_ipv6]
 
         @retransmit       = if options[:retransmit].nil?
                               true
@@ -128,7 +129,7 @@ module CoRE
           end
         # MRI throws IPAddr::InvalidAddressError, JRuby an ArgumentError
         rescue ArgumentError
-          host = Resolver.address(host)
+          host = Resolver.address(host, options[:force_ipv6])
           retry
         end
 
