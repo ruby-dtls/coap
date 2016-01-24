@@ -17,7 +17,7 @@ class TestClient < Minitest::Test
     assert_equal('world', answer.payload)
 
     client = CoRE::CoAP::Client.new
-    answer = client.get('/hello', '134.102.218.16')
+    answer = client.get('/hello', '134.102.218.18')
     assert_equal([2, 5], answer.mcode)
     assert_equal('world', answer.payload)
   end
