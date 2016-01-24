@@ -23,12 +23,12 @@ class TestClient < Minitest::Test
     assert_equal([2, 5], answer.mcode)
     assert_equal('world', answer.payload)
 
-    coap_me_ipv6_address = Addrinfo.ip("6.coap.me").ip_address
+    # coap_me_ipv6_address = Addrinfo.ip("6.coap.me").ip_address
 
-    client = CoRE::CoAP::Client.new
-    answer = client.get('/hello', coap_me_ipv6_address)
-    assert_equal([2, 5], answer.mcode)
-    assert_equal('world', answer.payload)
+    # client = CoRE::CoAP::Client.new
+    # answer = client.get('/hello', coap_me_ipv6_address)
+    # assert_equal([2, 5], answer.mcode)
+    # assert_equal('world', answer.payload)
 
   end
 
