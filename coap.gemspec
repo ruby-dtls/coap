@@ -33,6 +33,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rake',      '~> 10.3'
   s.add_development_dependency 'rspec',     '~> 3.0'
 
-  s.add_dependency 'celluloid-io', '>= 0.16.1', '< 0.17'
+  s.add_dependency 'celluloid-io', '~> 0.17.3'
   s.add_dependency 'resolv-ipv6favor', '~> 0'
 end
