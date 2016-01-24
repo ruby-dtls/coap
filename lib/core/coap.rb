@@ -18,6 +18,7 @@ module CoRE
   end
 end
 
+require 'celluloid/current'
 require 'celluloid/io'
 require 'ipaddr'
 require 'logger'
