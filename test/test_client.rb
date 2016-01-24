@@ -6,30 +6,26 @@ require 'helper'
 
 class TestClient < Minitest::Test
   def test_client_get_v4_v6_hostname
-    # client = CoRE::CoAP::Client.new
-    # answer = client.get('/hello', '2001:638:708:30da:219:d1ff:fea4:abc5')
-    # assert_equal([2, 5],answer.mcode)
-    # assert_equal('world',answer.payload)
-
     client = CoRE::CoAP::Client.new
     answer = client.get('/hello', 'coap.me')
     assert_equal([2, 5], answer.mcode)
     assert_equal('world', answer.payload)
 
-    coap_me_ipv4_address = Addrinfo.ip("4.coap.me").ip_address
+    coap_me_ipv4_address = Addrinfo.ip('4.coap.me').ip_address
 
     client = CoRE::CoAP::Client.new
     answer = client.get('/hello', coap_me_ipv4_address)
     assert_equal([2, 5], answer.mcode)
     assert_equal('world', answer.payload)
 
-    # coap_me_ipv6_address = Addrinfo.ip("6.coap.me").ip_address
+    if ENV['NO_IPV6_TESTS'].nil?
+      coap_me_ipv6_address = Addrinfo.ip('6.coap.me').ip_address
 
-    # client = CoRE::CoAP::Client.new
-    # answer = client.get('/hello', coap_me_ipv6_address)
-    # assert_equal([2, 5], answer.mcode)
-    # assert_equal('world', answer.payload)
-
+      client = CoRE::CoAP::Client.new
+      answer = client.get('/hello', coap_me_ipv6_address)
+      assert_equal([2, 5], answer.mcode)
+      assert_equal('world', answer.payload)
+    end
   end
 
   def test_client_404

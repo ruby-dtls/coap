@@ -47,7 +47,10 @@ describe Transmission do
     context 'resolve' do
       it 'no error for IP addresses' do
         expect { Transmission.send('hello', '127.0.0.1') }.not_to raise_error
-        expect { Transmission.send('hello', '::1') }.not_to raise_error
+
+        if ENV['NO_IPV6_TESTS'].nil?
+          expect { Transmission.send('hello', '::1') }.not_to raise_error
+        end
       end
 
       it 'error for invalid host' do
