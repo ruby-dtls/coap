@@ -20,6 +20,9 @@ matrix:
 notifications:
   email: false
 
+env:
+  - NO_IPV6_TESTS=1
+
 script:
   - bundle exec rake build
   - bundle exec rake coveralls
