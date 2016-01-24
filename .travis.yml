@@ -1,12 +1,21 @@
 language: ruby
 
+os:
+  - linux
+  - osx
+
 rvm:
-  - 2.2
-  - jruby
+  - head
+  - 2.3.0
+  - 2.2.4
+  - jruby-9.0.4.0
 
 matrix:
+  fast_finish: true
   allow_failures:
-    - rvm: jruby
+    - os: osx
+    - rvm: head
+    - rvm: jruby-9.0.4.0
 
 notifications:
   email: false
