@@ -33,6 +33,13 @@ module CoRE
       OPTIONS_I =
         Hash[OPTIONS.map { |k, v| [v[0], [k, *v]] }]
 
+      # register a new option.
+      # Example: CoRE::CoAP::Options.register(4711, :magic_option, *CoRE::CoAP::Options.o256_many(0, 15))
+      def self.register(onum, oname, *codec)
+        OPTIONS[onum] = v = [oname, *codec]
+        OPTIONS_I[oname] = [onum, *v]
+      end                       # this assumes no defaulting
+
       DEFAULTING_OPTIONS = 
         Hash[
           OPTIONS 
