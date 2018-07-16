@@ -17,6 +17,7 @@ module CoRE
     METHODS_I = invert_into_hash(METHODS)
 
     PORT = 5683
+    PORT_DTLS = 5684
 
     # Shortcut: CoRE::CoAP::parse == CoRE::CoAP::Message.parse
     def self.parse(*args)
