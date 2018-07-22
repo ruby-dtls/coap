@@ -66,7 +66,7 @@ The command line client supports the basic CoAP methods.
 
 You can skip the install section if you want to use Docker.
 
-    docker run coap get coap://coap.me/hello
+    docker run nning2/coap get coap://coap.me/hello
 
 ## Testing
 
