@@ -1,8 +1,7 @@
 [![Gem Version](https://img.shields.io/gem/v/coap.svg)](http://badge.fury.io/rb/coap)
-[![Dependency Status](https://img.shields.io/gemnasium/nning/coap.svg)](https://gemnasium.com/nning/coap)
 [![Build Status](https://img.shields.io/travis/nning/coap.svg)](https://travis-ci.org/nning/coap)
 [![Coverage Status](https://img.shields.io/coveralls/nning/coap.svg)](https://coveralls.io/r/nning/coap)
-[![Code Climate](https://img.shields.io/codeclimate/github/nning/coap.svg)](https://codeclimate.com/github/nning/coap)
+[![Code Climate](https://codeclimate.com/github/nning/coap/badges/gpa.svg)](https://codeclimate.com/github/nning/coap)
 
 # CoAP
 
@@ -75,4 +74,4 @@ The code is published under the MIT license (see the LICENSE file).
 
 * Carsten Bormann
 * Simon Frerichs
-* [henning mueller](https://henning.orgizm.net)
+* [henning mueller](https://nning.io)
