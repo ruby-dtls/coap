@@ -2,6 +2,7 @@
 [![Build Status](https://img.shields.io/travis/nning/coap.svg)](https://travis-ci.org/nning/coap)
 [![Coverage Status](https://img.shields.io/coveralls/nning/coap.svg)](https://coveralls.io/r/nning/coap)
 [![Code Climate](https://codeclimate.com/github/nning/coap/badges/gpa.svg)](https://codeclimate.com/github/nning/coap)
+[![Docker Hub Build Status](https://img.shields.io/docker/build/nning2/coap.svg)](https://hub.docker.com/r/nning2/coap/)
 
 # CoAP
 
