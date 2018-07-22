@@ -68,7 +68,7 @@ describe Client do
 
       @t1 = Thread.start do
         subject.observe \
-          '/obs', 'vs0.inf.ethz.ch', nil,
+          '/time', 'test.libcoap.net', nil,
           ->(s, m) { @answers << m }
       end
 
