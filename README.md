@@ -62,6 +62,12 @@ The command line client supports the basic CoAP methods.
 
     coap get coap://coap.me/.well-known/core
 
+### With Docker
+
+You can skip the install section if you want to use Docker.
+
+    docker run coap get coap://coap.me/hello
+
 ## Testing
 
     rake
