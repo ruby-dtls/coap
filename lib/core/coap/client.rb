@@ -11,7 +11,8 @@ module CoRE
       #                   (maximum retransmission count, default 4),
       #                   recv_timeout (timeout for ACK responses, default: 2),
       #                   host (destination host), post (destination port,
-      #                   default 5683).
+      #                   default 5683), dtls_id (DTLS client identity)
+      #                   and dtls_key (DTLS pre-shared key).
       def initialize(options = {})
         @max_payload = options[:max_payload] || 256
 
@@ -26,7 +27,17 @@ module CoRE
       # Enable DTLS socket.
       def use_dtls
         require 'tinydtls'
+
+        id  = @options[:dtls_id]
+        key = @options[:dtls_key]
+
+        if id.nil? or key.nil?
+          raise ArgumentError.new("DTLS support requires specification of an identity/key pair")
+        end
+
         @options[:socket] = TinyDTLS::UDPSocket.new
+        @options[:socket].add_client(id, key)
+
         self
       end
 
