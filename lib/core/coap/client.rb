@@ -25,8 +25,8 @@ module CoRE
 
       # Enable DTLS socket.
       def use_dtls
-        require 'CoDTLS'
-        @options[:socket] = CoDTLS::SecureSocket
+        require 'tinydtls'
+        @options[:socket] = TinyDTLS::UDPSocket.new
         self
       end
 
