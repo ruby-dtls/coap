@@ -267,6 +267,11 @@ module CoRE
         @logger.debug 'URI decoded: ' + uri.inspect
         fail ArgumentError, 'Invalid URI' if uri.nil?
 
+        scheme = uri.first
+        if scheme == "coaps"
+          self.use_dtls
+        end
+
         uri.drop(1)
       end
 
