@@ -17,6 +17,8 @@ Usage: #{File.basename($0)} [options] <method> <uri>
                                   STDOUT or a file path.
   --payload, -p         <string>  Payload for POST and PUT as string.
   --payload-file, -f    <file>    Read payload for POST and PUT from file.
+  --identity-file, -i   <file>    Read DTLS identity from file.
+  --key-file, -k        <file>    Read DTLS PSK form file.
   --type, -t            <type>    Message type (con, non, ack, rst).
   --help, -h                      This usage message.
 
@@ -27,6 +29,8 @@ end
 METHODS = CoAP::METHODS + [:observe]
 
 opts = GetoptLong.new(
+  ['--identity-file',   '-i', GetoptLong::REQUIRED_ARGUMENT],
+  ['--key-file',        '-k', GetoptLong::REQUIRED_ARGUMENT],
   ['--content-format',  '-c', GetoptLong::REQUIRED_ARGUMENT],
   ['--debug',           '-d', GetoptLong::NO_ARGUMENT],
   ['--output',          '-o', GetoptLong::REQUIRED_ARGUMENT],
@@ -36,13 +40,18 @@ opts = GetoptLong.new(
   ['--help',            '-h', GetoptLong::NO_ARGUMENT]
 )
 
-$DEBUG  = false
-output  = nil
-payload = nil
-options = {}
+$DEBUG   = false
+output   = nil
+payload  = nil
+options  = {}
+initopts = {}
 
 opts.each do |opt, arg|
   case opt
+  when '--identity-file'
+    initopts[:dtls_id] = File.read(arg)
+  when '--key-file'
+    initopts[:dtls_key] = File.read(arg)
   when '--content-format'
     cf = CoAP::Registry.convert_content_format(arg)
     options[:content_format] = cf
@@ -78,7 +87,7 @@ uri = URI.parse(uri)
 
 usage unless uri.scheme[/^coap/]
 
-client = CoAP::Client.new
+client = CoAP::Client.new(initopts)
 
 answer = case method
 when :get
