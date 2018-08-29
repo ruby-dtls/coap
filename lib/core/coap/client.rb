@@ -267,7 +267,7 @@ module CoRE
         @logger.debug 'URI decoded: ' + uri.inspect
         fail ArgumentError, 'Invalid URI' if uri.nil?
 
-        uri
+        uri.drop(1)
       end
 
       def initialize_message(method, path, query = nil, payload = nil)

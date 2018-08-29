@@ -89,10 +89,17 @@ module CoRE
       end
 
       def scheme_and_authority_decode(s)
-        if s =~ %r{\A(?:coap://)((?:\[|%5B)([^\]]*)(?:\]|%5D)|([^:/]*))(:(\d+))?(/.*)?\z}i
-          host = $2 || $3       # Should check syntax...
-          port = $5 || CoAP::PORT
-          [$6, host, port.to_i]
+        if s =~ %r{\A(?:(coap|coaps)://)((?:\[|%5B)([^\]]*)(?:\]|%5D)|([^:/]*))(:(\d+))?(/.*)?\z}i
+          scheme = $1 || "coap"
+          host   = $3 || $4       # Should check syntax...
+          port   = $6
+
+          if port.nil?
+            port = scheme == "coap" ?
+              CoAP::PORT : CoAP::PORT_DTLS
+          end
+
+          [scheme, $7, host, port.to_i]
         end
       end
 
